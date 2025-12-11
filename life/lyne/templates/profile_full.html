@@ -1,0 +1,189 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Profile — LifeLyne</title>
+  <link rel="stylesheet" href="{% static 'main.css' %}">
+  <style>
+    /* PROFILE PAGE SPECIFIC (paste into main.css later if you want) */
+    .profile-wrap { max-width: 1150px; margin: 28px auto; padding: 18px; display: grid; grid-template-columns: 280px 1fr 320px; gap: 24px; }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius: 12px; padding: 18px; border: 1px solid rgba(255,255,255,0.04); box-shadow: 0 12px 30px rgba(2,6,23,0.5); color: #E8EEF6; }
+    .profile-photo { width:100%; border-radius: 14px; overflow: hidden; }
+    .profile-photo img { width:100%; height:360px; object-fit:cover; display:block; }
+    .avatar-row { display:flex; gap:12px; align-items:center; margin-bottom:10px; }
+    .avatar { width:84px; height:84px; border-radius:50%; overflow:hidden; border:3px solid rgba(255,255,255,0.06); }
+    .avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+    .name { font-size:20px; font-weight:700; }
+    .muted { color: #A7B1BD; font-size:14px; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.03); font-size:13px; }
+    .progress { height:10px; background:rgba(255,255,255,0.03); border-radius:999px; margin-top:8px; overflow:hidden; }
+    .progress > i { display:block; height:100%; background:linear-gradient(90deg, #88B4D5, #C9A86A); width:80%; } /* 80% example */
+    .section-title { font-weight:700; margin-bottom:10px; font-size:16px; }
+    .info-grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .info-line { font-size:14px; color:#E5E9F0; padding:8px 10px; border-radius:8px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02); }
+    .photos-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
+    .photos-grid img{ width:100%; height:140px; object-fit:cover; border-radius:8px; }
+    .btn-sm { padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.08); background:linear-gradient(120deg,#88B4D5,#C9A86A); color:#081021; font-weight:600; cursor:pointer; }
+    .matches-list .match { margin-bottom:12px; padding:12px; border-radius:10px; background: rgba(0,0,0,0.12); display:flex; gap:12px; align-items:center; border:1px solid rgba(255,255,255,0.03); }
+    .matches-list .match img{ width:66px; height:66px; object-fit:cover; border-radius:8px;}
+    .tabs { display:flex; gap:10px; margin-bottom:12px; }
+    .tab { padding:8px 12px; border-radius:999px; background:transparent; border:1px solid rgba(255,255,255,0.03); cursor:pointer; color:#DDE6EF; }
+    .tab.active { background: linear-gradient(120deg,#88B4D5,#C9A86A); color:#071226; border: none; }
+    @media (max-width:1100px){ .profile-wrap { grid-template-columns: 1fr; } .photos-grid img{height:120px} }
+  </style>
+</head>
+<body>
+  <!-- RE-USE YOUR NAVBAR -->
+  <header class="navbar"> 
+    <div class="nav-left"><span class="life">Life</span><span class="lyne">LYNE</span></div>
+    <nav class="nav-links"><a href="{% url 'home' %}">Home</a><a href="{% url 'services' %}">Services</a><a href="{% url 'help' %}">Help</a></nav>
+    <div class="nav-actions"><button class="btn">Login</button><button class="btn btn-primary">Register Free</button></div>
+  </header>
+
+  <main style="padding-top:96px;">
+    <div class="profile-wrap">
+
+      <!-- LEFT: Profile Card -->
+      <aside>
+        <div class="card">
+          <div class="avatar-row">
+            <div class="avatar"><img src="{% static 'img/avatar_demo.jpg' %}" alt="avatar"/></div>
+            <div>
+              <div class="name">Shruti (Demo)</div>
+              <div class="muted">25 • Hyderabad • Software Engineer</div>
+            </div>
+          </div>
+
+          <div class="section-title">Profile completion</div>
+          <div class="progress"><i></i></div>
+          <div style="margin-top:12px"><button class="btn-sm">Edit profile</button></div>
+
+          <hr style="border:none;height:12px;">
+          <div class="section-title">Basic</div>
+          <div class="info-grid">
+            <div class="info-line">Age: 25</div>
+            <div class="info-line">Height: 5'5"</div>
+            <div class="info-line">Religion: Hindu</div>
+            <div class="info-line">Location: Hyderabad</div>
+            <div class="info-line">Education: B.Tech</div>
+            <div class="info-line">Occupation: Software Engineer</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CENTER: Photos + Info + About -->
+      <section>
+        <div class="card profile-photo">
+          <img src="{% static 'img/img2.jpg' %}" alt="hero photo">
+          <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex;gap:8px;">
+              <button class="btn-sm">Message</button>
+              <button class="btn-sm">Shortlist</button>
+            </div>
+            <div class="muted">Last active: 2 days ago</div>
+          </div>
+        </div>
+
+        <div style="height:18px;"></div>
+
+        <div class="card">
+          <div class="tabs">
+            <div class="tab active" data-tab="about">About</div>
+            <div class="tab" data-tab="education">Education</div>
+            <div class="tab" data-tab="family">Family</div>
+            <div class="tab" data-tab="preferences">Preferences</div>
+          </div>
+
+          <div id="tab-about" class="tab-panel">
+            <div class="section-title">About</div>
+            <p style="color:#CFE3F4; line-height:1.6;">
+              Demo bio: Friendly, family-oriented, loves travel and cooking. Looking for a kind, respectful partner.
+            </p>
+            <div style="height:8px"></div>
+            <div class="section-title">Photos</div>
+            <div class="photos-grid">
+              <img src="{% static 'img/img3.jpg' %}" alt="">
+              <img src="{% static 'img/img4.jpg' %}" alt="">
+              <img src="{% static 'img/img5.jpg' %}" alt="">
+            </div>
+          </div>
+
+          <div id="tab-education" class="tab-panel" style="display:none;">
+            <div class="section-title">Education & Career</div>
+            <p class="muted">B.Tech — Computer Science</p>
+            <p class="muted">Software Engineer at DemoCorp</p>
+          </div>
+
+          <div id="tab-family" class="tab-panel" style="display:none;">
+            <div class="section-title">Family</div>
+            <p class="muted">Nuclear family, parents working, 1 sister.</p>
+          </div>
+
+          <div id="tab-preferences" class="tab-panel" style="display:none;">
+            <div class="section-title">Looking For</div>
+            <p class="muted">Age 27–32 • Height 5'7" and above • Hyderabad / Bangalore • Educated</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- RIGHT: Preferences & Matches -->
+      <aside>
+        <div class="card">
+          <div class="section-title">Your preferences (demo)</div>
+          <div style="font-size:14px; color:#CDE2F5; margin-bottom:8px;">Age: 27-32 • Location: Hyderabad/Bengaluru</div>
+          <button class="btn-sm">Edit preferences</button>
+        </div>
+
+        <div style="height:14px"></div>
+
+        <div class="card">
+          <div class="section-title">Recommended matches</div>
+          <div class="matches-list">
+            <div class="match">
+              <img src="{% static 'img/img6.jpg' %}" alt="">
+              <div>
+                <div style="font-weight:700">Rahul, 27</div>
+                <div class="muted">5'9" • Software Eng • Bangalore</div>
+                <div style="margin-top:6px"><span class="pill">92% match</span></div>
+              </div>
+            </div>
+
+            <div class="match">
+              <img src="{% static 'img/img7.jpg' %}" alt="">
+              <div>
+                <div style="font-weight:700">Arjun, 29</div>
+                <div class="muted">5'10" • Doctor • Hyderabad</div>
+                <div style="margin-top:6px"><span class="pill">86% match</span></div>
+              </div>
+            </div>
+
+            <div style="text-align:center; margin-top:8px;">
+              <button class="btn-sm">
+                View all matches
+              </button>
+
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <script>
+    // Tabs (tiny)
+    document.querySelectorAll('.tab').forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        const name = t.getAttribute('data-tab');
+        document.querySelectorAll('.tab-panel').forEach(p => p.style.display='none');
+        const panel = document.getElementById('tab-' + name);
+        if(panel) panel.style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html>

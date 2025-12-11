@@ -1,0 +1,89 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registration Successful</title>
+
+<link rel="stylesheet" href="{% static 'main.css' %}">
+
+<style>
+body {
+    background: var(--navy);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Poppins, sans-serif;
+    text-align: center;
+}
+
+.success-box {
+    background: rgba(255,255,255,0.05);
+    padding: 40px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 450px;
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    animation: pop 0.6s ease-out;
+}
+
+@keyframes pop {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.success-title {
+    font-size: 24px;
+    color: var(--gold);
+    margin-bottom: 10px;
+}
+
+.success-msg {
+    font-size: 16px;
+    color: var(--soft-blue);
+    margin-bottom: 25px;
+}
+
+.redirect {
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--light-grey);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="success-box">
+    <div class="success-title">Registration Successful 🎉</div>
+
+    <div class="success-msg">
+        Welcome, <strong>{{ user_name }}</strong><br>
+        Your profile has been created successfully.
+    </div>
+
+    <div style="color: var(--white); font-size:14px;">
+        Redirecting to dashboard...
+    </div>
+
+    <div class="redirect">
+        If not redirected automatically, <a href="{% url 'dashboard' %}" style="color: var(--gold);">click here</a>.
+    </div>
+</div>
+
+<script>
+    setTimeout(() => {
+        window.location.href = "{% url 'dashboard' %}";
+    }, 3000);
+</script>
+
+</body>
+</html>

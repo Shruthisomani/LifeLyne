@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LifeLyne – Connecting Hearts Perfectly</title>
+    <link rel="stylesheet" href="{% static 'main.css' %}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <header class="navbar">
+    <div class="nav-left">
+        <span class="life">Life</span><span class="lyne">LYNE</span>
+    </div>
+
+    <nav class="nav-links">
+        <a href="{% url 'home' %}" class="active">Home</a>
+        <a href="{% url 'services' %}">Services</a>
+        <a href="{% url 'help' %}">Help</a>
+    </nav>
+
+    <div class="nav-actions">
+        
+        <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+       <a href="{% url 'register'%}" class="btn btn-primary">Register for Free</a>
+    </div>
+</header>
+
+
+   <main class="page home-page">
+
+        <!-- SLIDER -->
+                <!-- SLIDER (film-strip style) -->
+        <section class="slider">
+            <div class="slider-track">
+                <img src="{% static 'img/img1.jpg' %}" alt="">
+                <img src="{% static 'img/img2.jpg' %}" alt="">
+                <img src="{% static 'img/img3.jpg' %}" alt="">
+                <img src="{% static 'img/img4.jpg' %}" alt="">
+                <img src="{% static 'img/img5.jpg' %}" alt="">
+                <img src="{% static 'img/img6.jpg' %}" alt="">
+                <img src="{% static 'img/img7.jpg' %}" alt="">
+                <img src="{% static 'img/img8.jpg' %}" alt="">
+                <img src="{% static 'img/img9.jpg' %}" alt="">
+                <img src="{% static 'img/img10.jpg' %}" alt="">
+                <img src="{% static 'img/img11.jpg' %}" alt="">
+                <img src="{% static 'img/img12.jpg' %}" alt="">
+                <img src="{% static 'img/img13.jpg' %}" alt="">
+                <img src="{% static 'img/img14.jpg' %}" alt="">
+                <img src="{% static 'img/img15.jpg' %}" alt="">
+                <img src="{% static 'img/img16.jpg' %}" alt="">
+                <img src="{% static 'img/img17.jpg' %}" alt="">
+                <img src="{% static 'img/img18.jpg' %}" alt="">
+                <img src="{% static 'img/img19.jpg' %}" alt="">
+    
+                <!-- LGBT category -->
+                <img src="{% static 'img/gay.jpg' %}" alt="">
+                <img src="{% static 'img/gay1.jpg' %}" alt="">
+                <img src="{% static 'img/lesbian.jpg' %}" alt="">
+                <img src="{% static 'img/lesbian1.jpg' %}" alt="">
+            </div>
+        </section>
+
+
+
+        <!-- SLOGAN -->
+        <section class="hero-text">
+            <div class="hero-title">
+                Connecting hearts <span>perfectly</span> across every culture.
+            </div>
+            <p class="hero-sub hero-sub-stacked">
+    <span class="hero-line hero-line-muted">
+        Where hearts meet with trust.
+    </span>
+    <span class="hero-line hero-line-muted">
+        Where traditions meet modern love.
+    </span>
+    <span class="hero-line hero-line-strong">
+        Where every match feels meant to be — 
+        <span class="hero-brand">LifeLyne.</span>
+    </span>
+</p>
+    <!-- SIMPLE CTA — Find your perfect LifeLyne -->
+    <!-- SIMPLE CTA — Find your perfect LifeLyne -->
+<section class="lifelyne-cta">
+  <a class="cta-btn" href="{% url 'register'%}" >
+    Find your perfect LifeLyne
+  </a>
+</section>
+
+    </main>
+
+    <script src="{% static 'main.js' %}"></script>
+</body>
+</html>

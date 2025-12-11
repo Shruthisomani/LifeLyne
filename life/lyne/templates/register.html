@@ -1,0 +1,263 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Select Profile Type — Matrimony</title>
+
+<link rel="stylesheet" href="{% static 'main.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ---------------------------------------------------------
+   THEME (safe non-conflicting)
+--------------------------------------------------------- */
+:root {
+    --reg-navy: #0B1A2A;
+    --reg-gold: #C9A86A;
+    --reg-blue: #88B4D5;
+    --reg-white: #FFFFFF;
+}
+
+/* ---------------------------------------------------------
+   PAGE BASE
+--------------------------------------------------------- */
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Poppins", sans-serif;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(136,180,213,0.08), transparent),
+      linear-gradient(180deg, rgba(10,20,40,0.5), rgba(0,0,0,0.55)),
+      var(--reg-navy);
+    color: var(--reg-white);
+}
+
+/* ---------------------------------------------------------
+   CENTER CARD CONTAINER
+--------------------------------------------------------- */
+.reg-container {
+    width: min(1000px, 94%);
+    padding: 32px;
+    border-radius: 26px;
+    backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.55);
+    animation: fadeIn 0.7s ease-out forwards;
+    opacity: 0;
+}
+@keyframes fadeIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------------------------------------------
+   HEADER
+--------------------------------------------------------- */
+.reg-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+.reg-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--reg-gold);
+}
+.reg-sub {
+    font-size: 1.15rem;
+    color: var(--reg-blue);
+    margin-top: 6px;
+}
+
+/* ---------------------------------------------------------
+   CARDS LAYOUT
+--------------------------------------------------------- */
+.reg-cards {
+    display: flex;
+    gap: 26px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------
+   CARD BASE STYLE (Glass + 3D + Gradient Accents)
+--------------------------------------------------------- */
+.reg-card {
+    width: 280px;
+    height: 330px;
+    border-radius: 22px;
+    padding: 22px;
+    position: relative;
+    text-align: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.45);
+    transition: all 0.35s ease;
+    overflow: hidden;
+}
+.reg-card:hover {
+    transform: translateY(-14px) scale(1.03);
+    box-shadow: 0 22px 55px rgba(0,0,0,0.6);
+    border-color: var(--reg-gold);
+}
+
+/* Top glowing line */
+.reg-card::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 0; right: 0;
+    height: 6px;
+    border-radius: 20px;
+    background: linear-gradient(90deg, transparent, transparent);
+    transition: 0.4s ease;
+}
+.reg-card:hover::before {
+    background: linear-gradient(90deg, var(--reg-blue), var(--reg-gold));
+}
+
+/* ---------------------------------------------------------
+   ICON STYLING
+--------------------------------------------------------- */
+.reg-icon {
+    width: 90px;
+    height: 90px;
+    margin: 10px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    transition: 0.35s ease;
+}
+.reg-card:hover .reg-icon {
+    transform: scale(1.12);
+    border-color: var(--reg-gold);
+}
+
+/* Minimal Premium SVG Icons */
+.reg-icon svg {
+    width: 50px;
+    height: 50px;
+    stroke: var(--reg-blue);
+}
+
+.reg-card-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-top: 18px;
+}
+
+.reg-desc {
+    font-size: 1rem;
+    color: var(--reg-blue);
+    margin-top: 10px;
+    padding: 0 12px;
+    line-height: 1.35;
+}
+
+.reg-cta {
+    position: absolute;
+    bottom: 16px;
+    width: 100%;
+    left: 0;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--reg-white);
+    opacity: 0.8;
+}
+
+/* Full clickable link */
+.reg-link {
+    position: absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    z-index: 5;
+}
+
+/* Responsive */
+@media(max-width: 760px) {
+    .reg-card {
+        width: 100%;
+        max-width: 450px;
+        height: auto;
+        padding-bottom: 60px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="reg-container">
+
+    <div class="reg-header">
+        <h1 class="reg-title">Choose Your Profile Type</h1>
+        <p class="reg-sub">Select the option that best represents you</p>
+    </div>
+
+    <div class="reg-cards">
+
+        <!-- Bride -->
+        <div class="reg-card">
+            <a class="reg-link" href="/register/bride/"></a>
+
+            <div class="reg-icon">
+                <!-- Minimal Bride Icon -->
+                <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="25" cy="22" r="12"/>
+                    <path d="M10 60 Q25 35 40 60 Z"/>
+                </svg>
+            </div>
+
+            <div class="reg-card-title">Female</div>
+            <div class="reg-desc">Create a premium bride profile<br>and find verified matches.</div>
+            <div class="reg-cta">Continue as Bride →</div>
+        </div>
+
+        <!-- Groom -->
+        <div class="reg-card">
+            <a class="reg-link" href="/register/groom/"></a>
+
+            <div class="reg-icon">
+                <!-- Minimal Groom Icon -->
+                <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="25" cy="20" r="12"/>
+                    <path d="M10 60 L25 35 L40 60"/>
+                </svg>
+            </div>
+
+            <div class="reg-card-title">Male</div>
+            <div class="reg-desc">Setup your groom profile<br>and begin your journey.</div>
+            <div class="reg-cta">Continue as Groom →</div>
+        </div>
+
+        <!-- LGBTQ -->
+        <div class="reg-card">
+            <a class="reg-link" href="/register/lgbtq/"></a>
+
+            <div class="reg-icon">
+                <!-- Minimal LGBTQ Halo Icon -->
+                <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="25" cy="25" r="18"/>
+                    <circle cx="25" cy="25" r="8"/>
+                </svg>
+            </div>
+
+            <div class="reg-card-title">LGBTQ+</div>
+            <div class="reg-desc">Inclusive & respectful registration<br>for LGBTQ+ identities.</div>
+            <div class="reg-cta">Continue →</div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

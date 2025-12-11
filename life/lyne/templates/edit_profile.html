@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Edit Profile — Appearance Preview</title>
+  <style>
+   :root{
+  --bg: #0B1220;
+  --card: #111827;
+  --muted: #94A3B8;
+  --accent: #3B82F6;
+  --radius: 14px;
+  --border: rgba(255,255,255,0.08);
+}
+
+*{box-sizing:border-box;}
+
+body{
+  font-family:Inter, system-ui;
+  margin:0;
+  background:var(--bg);
+  color:white;
+}
+
+.wrap{
+  max-width:1250px;
+  margin:40px auto;
+  padding:0 20px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:480px 1fr;
+  gap:28px;
+}
+
+/* CARD */
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:22px;
+  border:1px solid var(--border);
+  box-shadow:0 6px 18px rgba(0,0,0,0.35);
+}
+
+/* HEADINGS */
+h2{
+  margin:0 0 8px;
+  font-size:20px;
+  font-weight:600;
+}
+.muted{color:var(--muted); font-size:13px}
+
+/* LEFT FORM */
+.avatar-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+
+.avatar{
+  width:95px;
+  height:95px;
+  border-radius:14px;
+  overflow:hidden;
+  background:#1F2937;
+  border:1px solid var(--border);
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.file-label{
+  padding:7px 10px;
+  border-radius:8px;
+  border:1px dashed var(--border);
+  font-size:12px;
+  color:var(--muted);
+  cursor:pointer;
+}
+
+.field{
+  margin-bottom:14px;
+}
+
+label{
+  font-size:13px;
+  font-weight:600;
+  margin-bottom:6px;
+  display:block;
+}
+
+input[type=text], textarea{
+  width:100%;
+  padding:10px 12px;
+  background:#0F172A;
+  border-radius:10px;
+  border:1px solid var(--border);
+  font-size:14px;
+  color:white;
+}
+
+textarea{
+  min-height:70px;
+  resize:vertical;
+}
+
+/* BUTTONS */
+.actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-top:12px;
+}
+
+.btn{
+  padding:10px 16px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  border:0;
+}
+
+.btn-primary{
+  background:var(--accent);
+  color:white;
+}
+
+.btn-ghost{
+  background:transparent;
+  border:1px solid var(--border);
+  color:white;
+}
+
+/* RIGHT PREVIEW */
+.preview-card{
+  padding:18px;
+  background:var(--card);
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+}
+
+.preview-avatar{
+  width:70px;
+  height:70px;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid var(--border);
+}
+
+.preview-avatar img{
+  width:100%; height:100%; object-fit:cover;
+}
+
+.preview-name{
+  font-weight:700;
+  font-size:17px;
+  margin-bottom:2px;
+}
+
+.preview-sub{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.preview-bio{
+  margin-top:12px;
+  font-size:14px;
+  line-height:1.4;
+  color:white;
+}
+
+.stat{
+  background:#1F2937;
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  font-size:13px;
+}
+
+/* FIXED PREVIEW IMAGE */
+.big-preview img{
+  width:100%;
+  height:270px;
+  object-fit:cover;
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+}
+
+/* SMALL PROFILE ROW */
+.small-card{
+  margin-top:16px;
+  padding:14px;
+  background:var(--card);
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
+.small-card img{
+  width:50px;
+  height:50px;
+  border-radius:10px;
+  object-fit:cover;
+}
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="grid">
+      <!-- Left: Edit Form -->
+      <div class="card">
+        <a href="{% url 'edit_profile' %}">Edit Profile</a>
+
+        <p class="muted">Change your display picture, name, headline and preview how your profile will look to others.</p>
+
+        <form id="editForm" onsubmit="event.preventDefault(); applyChanges();">
+
+          <div style="display:flex;gap:18px;align-items:flex-start;margin-top:16px">
+            <div class="avatar-wrap">
+              <div class="avatar" id="avatarBox">
+                <img id="avatarImg" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="avatar">
+              </div>
+              <label class="file-label">
+                Change photo
+                <input id="fileInput" type="file" accept="image/*" style="display:none" />
+              </label>
+              <div class="hint">JPG, PNG — max 2MB</div>
+            </div>
+
+            <div style="flex:1">
+              <div class="field">
+                <label for="fullName">Full name</label>
+                <input id="fullName" type="text" value="Shruti Sharma" />
+              </div>
+              <div class="field">
+                <label for="headline">Headline (short)</label>
+                <input id="headline" type="text" value="Product Designer • Coffee enthusiast" />
+              </div>
+              <div class="field">
+                <label for="location">Location</label>
+                <input id="location" type="text" value="Hyderabad, India" />
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="bio">Profile bio</label>
+            <textarea id="bio">I design simple interfaces and enjoy clean, accessible components.</textarea>
+            <div class="hint">A short bio helps people understand you. Keep it 1–2 lines.</div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">Save changes</button>
+            <button class="btn btn-ghost" type="button" onclick="resetPreview()">Cancel</button>
+            <div style="margin-left:auto" class="hint">Preview updates on the right.</div>
+          </div>
+        </form>
+
+      </div>
+
+      <!-- Right: Live Preview -->
+      <div class="preview">
+        <div class="preview-card card">
+          <div class="preview-header">
+            <div class="preview-avatar"><img id="pvAvatar" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="avatar"></div>
+            <div>
+              <div class="preview-name" id="pvName">Shruti Sharma</div>
+              <div class="preview-sub" id="pvHeadline">Product Designer • Coffee enthusiast</div>
+            </div>
+          </div>
+
+          <div class="preview-bio" id="pvBio">I design simple interfaces and enjoy clean, accessible components.</div>
+
+          <div class="preview-stats">
+            <div class="stat">Followers 1.2k</div>
+            <div class="stat">Following 320</div>
+            <div class="stat">Posts 46</div>
+          </div>
+        </div>
+
+        <!-- small extra card showing how the profile row appears in a list -->
+        <div style="margin-top:18px" class="card">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div style="width:52px;height:52px;border-radius:10px;overflow:hidden"><img id="listAvatar" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" style="width:100%;height:100%;object-fit:cover"></div>
+            <div>
+              <div style="font-weight:700" id="listName">Shruti Sharma</div>
+              <div class="muted" id="listHeadline">Product Designer • Coffee enthusiast</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get elements
+    const fileInput = document.getElementById('fileInput');
+    const avatarImg = document.getElementById('avatarImg');
+    const pvAvatar = document.getElementById('pvAvatar');
+    const listAvatar = document.getElementById('listAvatar');
+
+    const fullName = document.getElementById('fullName');
+    const headline = document.getElementById('headline');
+    const locationInput = document.getElementById('location');
+    const bio = document.getElementById('bio');
+
+    const pvName = document.getElementById('pvName');
+    const pvHeadline = document.getElementById('pvHeadline');
+    const pvBio = document.getElementById('pvBio');
+    const listName = document.getElementById('listName');
+    const listHeadline = document.getElementById('listHeadline');
+
+    // Click file input when label clicked
+    document.querySelector('.file-label').addEventListener('click',()=>fileInput.click());
+
+    // Live update functions
+    function readImage(file){
+      const reader = new FileReader();
+      reader.onload = e => {
+        avatarImg.src = e.target.result;
+        pvAvatar.src = e.target.result;
+        listAvatar.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    fileInput.addEventListener('change', e => {
+      const f = e.target.files && e.target.files[0];
+      if(!f) return;
+      if(f.size > 2*1024*1024){ alert('Image too large (max 2MB).'); return; }
+      readImage(f);
+    });
+
+    // apply changes from form to preview
+    function applyChanges(){
+      pvName.textContent = fullName.value || 'Unnamed';
+      listName.textContent = fullName.value || 'Unnamed';
+
+      pvHeadline.textContent = headline.value || '';
+      listHeadline.textContent = headline.value || '';
+
+      pvBio.textContent = bio.value || '';
+
+      // simple visual feedback
+      document.querySelector('.btn-primary').textContent = 'Saved ✓';
+      setTimeout(()=>document.querySelector('.btn-primary').textContent = 'Save changes',1200);
+    }
+
+    function resetPreview(){
+      // reload page to reset quickly — in production, restore saved values
+      window.location.reload();
+    }
+
+    // wire live typing updates (optional)
+    fullName.addEventListener('input', ()=>{ pvName.textContent = fullName.value; listName.textContent = fullName.value; });
+    headline.addEventListener('input', ()=>{ pvHeadline.textContent = headline.value; listHeadline.textContent = headline.value; });
+    bio.addEventListener('input', ()=>{ pvBio.textContent = bio.value; });
+
+  </script>
+
+  <!--
+    Integration notes (for Django):
+    - Replace the static default images with your user's avatar URL using template tags.
+      Example: <img src="{{ user.profile.avatar_url }}" />
+    - To persist changes, handle uploads in your Django view and return saved values to template.
+    - Keep CSRF token if you change the form to post: {% csrf_token %}
+  -->
+</body>
+</html>

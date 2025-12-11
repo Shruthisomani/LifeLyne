@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Services – LifeLyne</title>
+    <link rel="stylesheet" href="{% static 'main.css' %}">
+</head>
+<body>
+    <!-- NAVBAR (same as home) -->
+    <header class="navbar">
+    <div class="nav-left">
+        <span class="life">Life</span><span class="lyne">LYNE</span>
+    </div>
+
+    <nav class="nav-links">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'services' %}" class="active">Services</a>
+        <a href="{% url 'help' %}">Help</a>
+    </nav>
+
+    <div class="nav-actions">
+       <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+        <a href="{% url 'register'%}"class="btn btn-primary">Register Free</a>
+    </div>
+</header>
+
+
+    <main class="page services-page">
+        <!-- TOP TEXT -->
+        <section class="services-hero">
+            <p class="services-pill">What we offer</p>
+            <h1 class="services-title">One platform, many ways to protect your story.</h1>
+            <p class="services-sub">
+                LifeLyne combines powerful verification, intelligent matching and women-first
+                privacy controls to make every connection feel safer – for brides, grooms
+                and families.
+            </p>
+        </section>
+
+        <!-- ICON GRID WITH 3D CARDS -->
+        <section class="services-grid">
+            <article class="service-card">
+                <div class="service-icon">🔐</div>
+                <h2 class="service-heading">Triple ID Verification</h2>
+                <p class="service-text">
+                    Aadhaar / PAN ID, live selfie and OTP based mobile verification
+                    for a trusted blue-tick profile system that fights fake accounts.
+                </p>
+            </article>
+
+            <article class="service-card">
+                <div class="service-icon">🧠</div>
+                <h2 class="service-heading">Smart Match Engine</h2>
+                <p class="service-text">
+                    Weighted matching across religion, community, education, job,
+                    lifestyle and family preferences – so the most relevant matches
+                    appear first.
+                </p>
+            </article>
+
+            <article class="service-card">
+                <div class="service-icon">🛡️</div>
+                <h2 class="service-heading">Women-first Safety</h2>
+                <p class="service-text">
+                    Control who can see photos, hide contact details, block & report
+                    in one tap and review requests before sharing personal information.
+                </p>
+            </article>
+
+            <article class="service-card">
+                <div class="service-icon">🖼️</div>
+                <h2 class="service-heading">Photo Review & Filters</h2>
+                <p class="service-text">
+                    Blurry, fake or group photos can be flagged for review, keeping
+                    all profiles respectful, clear and focused on the real person.
+                </p>
+            </article>
+
+            <article class="service-card">
+                <div class="service-icon">💎</div>
+                <h2 class="service-heading">Premium Memberships</h2>
+                <p class="service-text">
+                    Gold, Diamond and Platinum plans unlock full messaging, contact
+                    details, advanced filters and boosted visibility for serious seekers.
+                </p>
+            </article>
+
+            <article class="service-card">
+                <div class="service-icon">🤝</div>
+                <h2 class="service-heading">Family-friendly Support</h2>
+                <p class="service-text">
+                    Assisted onboarding, profile setup help and quick response support
+                    so parents and elders can comfortably use LifeLyne with confidence.
+                </p>
+            </article>
+        </section>
+
+                <section class="services-grid">
+            
+        </section>
+
+        <!-- NEW HIGHLIGHT SECTION -->
+        <section class="services-highlight">
+            <div class="highlight-main">
+                <h2 class="highlight-title">Why families choose LifeLyne</h2>
+                <p class="highlight-text">
+                    We designed LifeLyne with Indian families in mind – combining strong verification,
+                    respect for culture and simple tools that even parents and elders can use
+                    comfortably.
+                </p>
+            </div>
+
+            <ul class="highlight-list">
+                <li>
+                    <span class="dot"></span>
+                    <span>Blue-tick verification so every profile starts with more trust.</span>
+                </li>
+                <li>
+                    <span class="dot"></span>
+                    <span>Women-first privacy controls for photos, contact and requests.</span>
+                </li>
+                <li>
+                    <span class="dot"></span>
+                    <span>Support for multiple Indian communities, states and languages.</span>
+                </li>
+                <li>
+                    <span class="dot"></span>
+                    <span>Clean, ad-light experience that keeps focus on real connections.</span>
+                </li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>
+
+    </main>
+</body>
+</html>

@@ -1,0 +1,1485 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bride Registration — Matrimony</title>
+
+  <link rel="stylesheet" href="{% static 'main.css' %}">
+
+  <!-- MediaPipe libs (kept here in head so they're available when needed) -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+
+  <style>
+    :root{
+      --navy: #0B1A2A;
+      --white: #FFFFFF;
+      --soft-blue: #88B4D5;
+      --gold: #C9A86A;
+      --light-grey: #D1D5DB;
+      --dark-grey: #4B5563;
+      --card-width: 760px;
+      --error: #ff6b6b;
+      --success: #28a745;
+    }
+
+    html,body{height:100%;}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      font-family: Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(136,180,213,0.06), transparent),
+        linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.35));
+      background-color: var(--navy);
+      color: var(--white);
+    }
+
+    .bride-card {
+      width: min(var(--card-width), 98%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: 16px;
+      box-shadow: 0 16px 40px rgba(2,6,23,0.6);
+      padding: 22px;
+      border:1px solid rgba(255,255,255,0.03);
+      backdrop-filter: blur(6px);
+      max-height: 94vh;
+      overflow: hidden;
+    }
+
+    .bride-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .bride-title { color:var(--gold); font-size:20px; font-weight:700; }
+    .bride-sub { color:var(--light-grey); font-size:13px; }
+
+    .bride-steps {
+      position:relative;
+      min-height:520px;
+      margin-top:6px;
+    }
+
+    .bride-step {
+      position:absolute;
+      inset:0;
+      padding:14px;
+      border-radius:10px;
+      transition: transform .45s cubic-bezier(.2,.9,.2,1), opacity .35s;
+      opacity:0;
+      pointer-events:none;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      transform-origin:left center;
+      overflow:auto;
+      background: transparent;
+    }
+
+    .bride-step.active { opacity:1; pointer-events:all; transform: translateX(0); }
+    .bride-step.left-out { transform: translateX(-30px) scale(.99); }
+    .bride-step.right-out { transform: translateX(30px) scale(.99); }
+
+    h2.bride-step-title { margin:6px 0; color:var(--soft-blue); font-size:18px; }
+
+    .bride-row { display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+    .bride-col { flex:1 1 220px; min-width:180px; }
+
+    .bride-field { display:flex; flex-direction:column; gap:8px; }
+    .bride-field label { font-size:13px; color:rgba(255,255,255,0.78); background:transparent; }
+
+    .bride-input {
+      background: rgba(255,255,255,0.02) !important;
+      border: 1px solid rgba(255,255,255,0.04) !important;
+      color: var(--white) !important;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size:14px;
+      outline: none;
+    }
+    select.bride-input option {
+    background: rgba(0, 0, 0, 0.85) !important;  /* transparent dark */
+    color: var(--white) !important;
+    }
+
+    select.bride-input {
+        background-color: rgba(255,255,255,0.02) !important;
+        color: var(--white) !important;
+    }
+    /* Fix white background for DOB dropdowns */
+select.dob-input {
+    background: rgba(255,255,255,0.02) !important;
+    color: var(--white) !important;
+    border: 1px solid rgba(255,255,255,0.04) !important;
+}
+
+/* Dark option menu (prevents white dropdown popup) */
+select.dob-input option {
+    background: rgba(0,0,0,0.85) !important;
+    color: var(--white) !important;
+}
+
+
+    .bride-input::placeholder { color: rgba(255,255,255,0.45); }
+
+    .bride-actions { display:flex; justify-content:center; gap:12px; margin-top:12px; width:100%; }
+    .bride-actions .bride-btn {
+      flex: 1; /* Makes both buttons equal width */
+    }
+    .bride-btn { padding:10px 16px; border-radius:10px; border:none; cursor:pointer; font-weight:700; min-width:110px; }
+    .bride-btn.ghost { background:transparent; color:var(--light-grey); border:1px solid rgba(255,255,255,0.04); }
+    .bride-btn.primary { background: linear-gradient(90deg,var(--soft-blue),var(--gold)); color:var(--navy); box-shadow: 0 10px 30px rgba(136,180,213,0.08); }
+    .bride-btn.submit { background: var(--gold); color: var(--navy); }
+
+    .bride-upload {
+      background: rgba(255,255,255,0.02);
+      border-radius:10px;
+      padding:12px;
+      border:1px dashed rgba(255,255,255,0.04);
+      min-height:120px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:8px;
+      cursor:pointer;
+    }
+    .bride-upload input[type=file]{ display:none; }
+
+    .preview-img { width:100%; max-height:200px; object-fit:contain; border-radius:8px; box-shadow: 0 12px 36px rgba(2,6,23,0.5); }
+
+    .face-guide {
+      width:140px; height:140px; border-radius:50%; border:3px dashed rgba(136,180,213,0.12);
+      display:flex;align-items:center;justify-content:center; animation: float 3s ease-in-out infinite;
+    }
+
+    .bride-hint { font-size:13px; color:rgba(255,255,255,0.72); }
+
+    .bride-error { color:var(--error); font-size:13px; display:none; margin-top:6px; }
+    .bride-error.visible { display:block; }
+
+    .bride-field .field-error { margin-top:6px; font-size:12px; color:var(--error); display:none; }
+    .bride-field .field-error.visible { display:block; }
+
+    .bride-shake { animation: shake 480ms cubic-bezier(.36,.07,.19,.97); }
+    @keyframes shake {
+      10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}
+    }
+
+    .small-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+    .otp-input { padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); background: rgba(255,255,255,0.02); color:var(--white); }
+
+    .camera-box { width:100%; max-width:420px; height:260px; background: rgba(0,0,0,0.14); border-radius:8px; border:1px dashed rgba(255,255,255,0.03); display:flex;align-items:center;justify-content:center; color:var(--light-grey); position:relative; overflow:hidden; }
+    .camera-box video { width:100%; height:100%; object-fit:cover; display:block; border-radius:8px; }
+
+    /* Availability dropdown style (premium) */
+    .availability-wrap { display:flex; gap:12px; align-items:center; }
+    .availability-select { appearance:none; -webkit-appearance:none; border-radius:8px; padding:10px 12px; border:1px solid rgba(255,255,255,0.04); background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); color:var(--white); min-width:220px; }
+
+    @media (max-width:720px) {
+      .bride-row { flex-direction:column; }
+      .bride-actions { flex-direction:column-reverse; }
+      .bride-btn { width:100%; }
+      .bride-card { padding:16px; }
+    }
+    .dob-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dob-input {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      color: var(--white);
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 14px;
+      width: 90px;
+    }
+
+    .dob-calendar {
+      cursor: pointer;
+      font-size: 22px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      transition: 0.2s;
+    }
+
+    .dob-calendar:hover {
+      background: rgba(255,255,255,0.12);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="bride-card" role="application" aria-labelledby="brideTitle">
+    <div class="bride-header">
+      <div>
+        <div id="brideTitle" class="bride-title">Bride Registration</div>
+        <div class="bride-sub">Secure · Verified · Private</div>
+      </div>
+      <div class="bride-sub" id="brideNote">Complete your profile to get verified matches.</div>
+    </div>
+
+    <form id="brideForm" method="post" enctype="multipart/form-data" action="{% url 'register_user_submit' %}">
+      {% csrf_token %}
+        <input type="hidden" name="identity" value="bride">
+        <input type="hidden" name="match_score" id="match_score">
+        <input type="hidden" name="face_verified" id="face_verified">
+
+      <div class="bride-steps">
+
+        <!-- Slide 1 — Basic details + Availability (Dropdown premium style) -->
+        <section class="bride-step active" data-step="1" id="step-1">
+          <h2 class="bride-step-title">Basic details</h2>
+
+          <div class="bride-row">
+            <div class="bride-col bride-field">
+              <label for="first_name">First name *</label>
+              <input id="first_name" name="first_name" class="bride-input" type="text" placeholder="Firstname" required>
+              <div class="field-error" data-for="first_name">Please enter first name</div>
+            </div>
+            <div class="bride-col bride-field">
+              <label for="last_name">Last name *</label>
+              <input id="last_name" name="last_name" class="bride-input" type="text" placeholder="Lastname" required>
+              <div class="field-error" data-for="last_name">Please enter last name</div>
+            </div>
+          </div>
+            <div class="bride-row">
+              <div class="bride-col bride-field">
+                <label>Date of birth *</label>
+
+                <div class="dob-wrapper">
+                  <select id="dob_day" class="dob-input" required>
+                    <option value="" disabled selected>DD</option>
+                  </select>
+
+                  <select id="dob_month" class="dob-input" required>
+                    <option value="" disabled selected>MM</option>
+                  </select>
+
+                  <select id="dob_year" class="dob-input" required>
+                    <option value="" disabled selected>YYYY</option>
+                  </select>
+
+                  <span class="dob-calendar" onclick="openNativeDatePicker()">📅</span>
+
+                  <!-- Hidden real field submitted to Django -->
+                  <input type="date" id="dob_real" name="dob" style="display:none;">
+                </div>
+                <div class="field-error" data-for="dob_real">Please select date of birth (18+)</div>
+              </div>
+            </div>
+
+              <div class="bride-row">
+              <div class="bride-col bride-field">
+                <label for="availability">Bride availability *</label>
+                <select id="availability" name="is_available" class="bride-input" required>
+                  <option value="" disabled selected>Select an option</option>
+                  <option value="yes">Bride is available </option>
+                  <option value="no">Bride is NOT available </option>
+                </select>
+                <div class="field-error" data-for="availability">Choose availability</div>
+              </div>
+            </div>
+
+          <div class="bride-error" id="err-1">Please fill required fields and choose availability.</div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="goToProfileSelection()">← Back</button>
+            <button type="button" class="bride-btn primary" onclick="nextStep()">Next →</button>
+          </div>
+        </section>
+
+        <!-- Slide 2 — Physical Details -->
+        <section class="bride-step" data-step="2" id="step-2">
+          <h2 class="bride-step-title">Physical details</h2>
+          <div class="bride-row">
+            <div class="bride-col bride-field">
+              <label for="height_cm">Height (cm)</label>
+              <input id="height_cm" name="height_cm" class="bride-input" type="number" min="90" max="250" placeholder="e.g. 160">
+              <div class="field-error" data-for="height_cm">Enter valid height (cm)</div>
+            </div>
+            <div class="bride-col bride-field">
+              <label for="weight_kg">Weight (kg)</label>
+              <input id="weight_kg" name="weight_kg" class="bride-input" type="number" min="25" max="200">
+              <div class="field-error" data-for="weight_kg">Enter valid weight (kg)</div>
+            </div>
+            <div class="bride-col bride-field">
+              <label for="blood_group">Blood group</label>
+              <input id="blood_group" name="blood_group" class="bride-input" type="text" placeholder="A+">
+              <div class="field-error" data-for="blood_group">Invalid value</div>
+            </div>
+          </div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+            <button type="button" class="bride-btn primary" onclick="nextStep()">Next →</button>
+          </div>
+        </section>
+
+        <!-- Slide 3 — Religion & Community -->
+        <section class="bride-step" data-step="3" id="step-3">
+          <h2 class="bride-step-title">Religion & community</h2>
+
+          <div class="bride-row">
+            <div class="bride-col bride-field">
+              <label for="religion">Religion</label>
+              <select id="religion" name="religion" class="bride-input">
+                <option value="" disabled selected>Select</option>
+                <option>Hindu</option>
+                <option>Muslim</option>
+                <option>Christian</option>
+                <option>Sikh</option>
+                <option>Jain</option>
+                <option>Other</option>
+              </select>
+              <div class="field-error" data-for="religion">Select religion or choose Other</div>
+            </div>
+
+            <div class="bride-col bride-field">
+              <label for="community">Community / Caste</label>
+              <input id="community" name="community" class="bride-input" type="text">
+              <div class="field-error" data-for="community">Invalid input</div>
+            </div>
+
+            <div class="bride-col bride-field">
+              <label for="sub_community">Sub-community *</label>
+                <input id="sub_community" name="sub_community" class="bride-input" type="text" required>
+                <div class="field-error" data-for="sub_community">Please enter sub-community</div>
+            </div>
+
+            <div class="bride-actions">
+              <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+              <button type="button" class="bride-btn primary" onclick="nextStep()">Next →</button>
+            </div>
+          </section>
+
+        <!-- Slide 4 — Location -->
+        <section class="bride-step" data-step="4" id="step-4">
+          <h2 class="bride-step-title">Location</h2>
+
+          <div class="bride-row">
+            <div class="bride-col bride-field">
+              <label for="stateSelect">State</label>
+              <select id="stateSelect" name="state" class="bride-input" required>
+                <option value="">Select state</option>
+                <!-- All 28 Indian states -->
+                <option value="andhra_pradesh">Andhra Pradesh</option>
+                <option value="arunachal_pradesh">Arunachal Pradesh</option>
+                <option value="assam">Assam</option>
+                <option value="bihar">Bihar</option>
+                <option value="chhattisgarh">Chhattisgarh</option>
+                <option value="goa">Goa</option>
+                <option value="gujarat">Gujarat</option>
+                <option value="haryana">Haryana</option>
+                <option value="himachal_pradesh">Himachal Pradesh</option>
+                <option value="jharkhand">Jharkhand</option>
+                <option value="karnataka">Karnataka</option>
+                <option value="kerala">Kerala</option>
+                <option value="madhya_pradesh">Madhya Pradesh</option>
+                <option value="maharashtra">Maharashtra</option>
+                <option value="manipur">Manipur</option>
+                <option value="meghalaya">Meghalaya</option>
+                <option value="mizoram">Mizoram</option>
+                <option value="nagaland">Nagaland</option>
+                <option value="odisha">Odisha</option>
+                <option value="punjab">Punjab</option>
+                <option value="rajasthan">Rajasthan</option>
+                <option value="sikkim">Sikkim</option>
+                <option value="tamil_nadu">Tamil Nadu</option>
+                <option value="telangana">Telangana</option>
+                <option value="tripura">Tripura</option>
+                <option value="uttar_pradesh">Uttar Pradesh</option>
+                <option value="uttarakhand">Uttarakhand</option>
+                <option value="west_bengal">West Bengal</option>
+              </select>
+              <div class="field-error" data-for="stateSelect">Please select state</div>
+            </div>
+
+            <div class="bride-col bride-field">
+              <label for="citySelect">City / District</label>
+              <select id="citySelect" name="city" class="bride-input" required>
+                <option value="">Select city</option>
+              </select>
+              <div class="field-error" data-for="citySelect">Please select city</div>
+            </div>
+
+            <div class="bride-col bride-field">
+              <label for="pincode">Pincode</label>
+              <input id="pincode" name="pincode" class="bride-input" type="text" maxlength="10" inputmode="numeric">
+              <div class="field-error" data-for="pincode">Invalid pincode</div>
+            </div>
+          </div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+            <button type="button" class="bride-btn primary" onclick="nextStep()">Next →</button>
+          </div>
+        </section>
+
+        <!-- Slide 5 — Contact + OTP -->
+        <section class="bride-step" data-step="5" id="step-5">
+          <h2 class="bride-step-title">Contact</h2>
+
+          <div class="bride-row">
+            <div class="bride-col bride-field">
+              <label for="mobile">Mobile number</label>
+              <input id="mobile" name="mobile" class="bride-input" type="tel" placeholder="+91xxxxxxxxxx">
+              <div class="field-error" data-for="mobile">Please Enter Mobile Number</div>
+            </div>
+
+            <div class="bride-col bride-field">
+              <label for="email">Email</label>
+              <input id="email" name="email" class="bride-input" type="email" placeholder="email@example.com" value="{{ request.POST.email }}">
+
+              <div class="field-error" data-for="email">Please Enter Email</div>
+
+              {% if error_email %}
+              <div class="field-error visible" style="color:#ff6b6b; margin-top:5px;">
+                {{ error_email }}
+              </div>
+              {% endif %}
+            </div>
+
+          </div>
+
+          <div class="bride-row" style="align-items:flex-start;">
+            <div class="bride-col">
+              <button type="button" class="bride-btn primary" onclick="sendOTP()">Send OTP</button>
+            </div>
+
+            <div class="bride-col">
+              <div id="otpBox" style="display:none;">
+                <div style="display:flex; gap:8px;">
+                  <input id="otpInput" class="otp-input" placeholder="Enter OTP (111111 for dev)" maxlength="6">
+                </div>
+                <div class="small-row" style="margin-top:8px;">
+                  <div class="timer" id="otpTimer">00:30</div>
+                  <button type="button" class="bride-btn ghost" onclick="resendOTP()">Resend</button>
+                  <button type="button" class="bride-btn primary" onclick="verifyOTP()">Verify</button>
+                </div>
+                <div id="otpStatus" style="margin-top:8px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+            <button type="button" class="bride-btn primary" onclick="nextStepIfVerified()">Next →</button>
+          </div>
+        </section>
+
+        <!-- Slide 6 — ID Type (user picks one; we'll accept any one and face-verify against the uploaded front image) -->
+        <section class="bride-step" data-step="6" id="step-6">
+          <h2 class="bride-step-title">ID type</h2>
+
+          <div class="bride-row">
+            <div class="bride-col bride-field">
+              <label for="idType">Select ID proof (one)</label>
+              <select id="idType" name="id_type" class="bride-input" required>
+                <option value="">Choose</option>
+                <option value="aadhaar">Aadhaar</option>
+                <option value="voter">Voter ID</option>
+                <option value="pan">PAN Card</option>
+              </select>
+              <div class="field-error" data-for="idType">Select an ID type</div>
+              <div class="bride-hint" style="margin-top:6px;">Upload only one preferred ID front (image). Face verification will use the uploaded front image.</div>
+            </div>
+          </div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+            <button type="button" class="bride-btn primary" onclick="nextStep()">Next →</button>
+          </div>
+        </section>
+
+        <!-- Slide 7 — ID Upload (front required, back optional) -->
+        <section class="bride-step" data-step="7" id="step-7">
+          <h2 class="bride-step-title">Upload ID</h2>
+
+          <div class="bride-row">
+            <div class="bride-col">
+              <label>Front side (image only)</label>
+              <div class="bride-upload" id="uploadFront" onclick="document.getElementById('frontFile').click()">
+                <div>Click to upload front</div>
+                <input type="file" id="frontFile" name="id_proof_front" accept="image/*" required>
+              </div>
+              <div class="field-error" data-for="frontFile">Upload front ID image</div>
+            </div>
+
+            <div class="bride-col">
+              <label>Back side (optional)</label>
+              <div class="bride-upload" id="uploadBack" onclick="document.getElementById('backFile').click()">
+                <div>Click to upload back</div>
+                <input type="file" id="backFile" name="id_proof_back" accept="image/*,application/pdf">
+              </div>
+              <div class="field-error" data-for="backFile">Optional</div>
+            </div>
+          </div>
+
+          <div id="uploadPreview" style="display:flex; gap:12px; margin-top:12px;"></div>
+          <div id="uploadResult" style="margin-top:8px;"></div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+            <button type="button" class="bride-btn primary" onclick="afterIdUpload()">Next →</button>
+          </div>
+        </section>
+
+        <!-- Slide 8A — Live Selfie (if availability = available) -->
+        <section class="bride-step" data-step="8a" id="step-8a">
+          <h2 class="bride-step-title">Capture a live selfie</h2>
+
+          <div class="bride-row">
+            <div class="bride-col">
+              <div class="camera-box" id="selfieCameraBox">
+                <video id="selfieVideo" autoplay muted playsinline style="display:none; width:100%; border-radius:8px;"></video>
+                <canvas id="selfieCanvas" width="640" height="480" style="display:none;"></canvas>
+                <div id="selfiePlaceholder" class="bride-hint">Start camera to capture</div>
+              </div>
+
+              <div style="display:flex; gap:8px; margin-top:10px;">
+                <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+                <button type="button" class="bride-btn primary" id="startSelfieBtn" onclick="startSelfieCamera()">Start Camera</button>
+                <button type="button" class="bride-btn primary" id="captureSelfieBtn" onclick="captureSelfie()" style="display:none;">Capture</button>
+              </div>
+
+              <input type="hidden" id="selfie_data" name="selfie_data">
+              <div id="selfiePreview" style="margin-top:10px;"></div>
+            </div>
+
+            <div class="bride-col">
+              <div class="bride-hint">After selfie, we will compare it with your ID front. Required match: <strong>75%</strong></div>
+              <div id="selfieCompareStatus" class="bride-error" style="display:none; margin-top:8px;"></div>
+              <div style="margin-top:8px;">
+                <button type="button" class="bride-btn primary" onclick="compareSelfieWithId()">Compare & Continue →</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 8B — Photo Upload (if availability = not_available) -->
+        <section class="bride-step" data-step="8b" id="step-8b">
+          <h2 class="bride-step-title">Upload a clear photo</h2>
+
+          <div class="bride-row">
+            <div class="bride-col">
+              <label>Upload a clear photo of the bride</label>
+              <div class="bride-upload" onclick="document.getElementById('photoFile').click()">
+                <div>Click to upload</div>
+                <input type="file" id="photoFile" name="uploaded_photo" accept="image/*">
+              </div>
+            </div>
+
+            <div class="bride-col">
+              <div class="bride-hint">Preview</div>
+              <div id="photoPreview"></div>
+            </div>
+          </div>
+
+          <div id="compareStatus" class="bride-error" style="display:none; margin-top:8px;"></div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+            <button type="button" class="bride-btn primary" onclick="compareUploadedPhotoWithId()">Compare & Continue →</button>
+          </div>
+        </section>
+
+        <!-- Slide 9 — Face Movement Verification (MediaPipe) -->
+        <section class="bride-step" data-step="9" id="step-9">
+          <h2 class="bride-step-title">Face movement verification</h2>
+          <div class="bride-hint">Turn head left, turn head right, and blink once. This confirms a live user.</div>
+
+          <div style="display:flex; gap:18px; margin-top:12px; align-items:flex-start; flex-wrap:wrap;">
+            <div style="flex:1; min-width:260px;">
+              <div class="camera-box" id="faceCameraBox" style="position:relative;">
+                <video id="faceVideo" autoplay muted playsinline style="display:block;"></video>
+                <div id="faceOverlay" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:160px; height:160px; border-radius:50%; border:3px dashed rgba(136,180,213,0.16); pointer-events:none;"></div>
+                <canvas id="faceDebug" width="640" height="480" style="display:none;"></canvas>
+              </div>
+              <div style="display:flex; gap:8px; margin-top:10px;">
+                <button type="button" class="bride-btn primary" id="startFaceBtn" onclick="startFaceDetection()">Start camera</button>
+
+                <button type="button" class="bride-btn primary" id="retryFaceBtn" style="display:none" onclick="retryFaceDetection()">Retry</button>
+
+                <button type="button" class="bride-btn primary" id="stopFaceBtn" style="display:none" onclick="stopFaceDetection()">Stop</button>
+
+              </div>
+            </div>
+
+            <div style="flex:1; min-width:220px; display:flex; flex-direction:column; gap:8px;">
+              <div class="bride-hint">Detected actions</div>
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <div id="blinkStatus" style="padding:10px 12px; border-radius:8px; background:rgba(255,255,255,0.02)">Blink: ❌</div>
+                <div id="leftStatus" style="padding:10px 12px; border-radius:8px; background:rgba(255,255,255,0.02)">Turn left: ❌</div>
+                <div id="rightStatus" style="padding:10px 12px; border-radius:8px; background:rgba(255,255,255,0.02)">Turn right: ❌</div>
+              </div>
+
+              <div id="movementProgress" style="margin-top:10px; color:var(--light-grey)">Actions done: <strong id="actionsDone">0</strong>/3</div>
+              <div id="err-move" class="bride-error">Please complete all actions for verification.</div>
+            </div>
+          </div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+            <button type="button" class="bride-btn primary" id="faceNextBtn" onclick="verifyMovements()" disabled>Next →</button>
+          </div>
+        </section>
+
+        <!-- Slide 10 — Education -->
+        <section class="bride-step" data-step="10" id="step-10">
+  <h2 class="bride-step-title">Education</h2>
+
+  <div class="bride-row">
+    <div class="bride-col bride-field">
+      <label for="education">Highest education</label>
+      <select id="education" name="education" class="bride-input">
+        <option value="">Select</option>
+        <option>High School</option>
+        <option>Bachelor's</option>
+        <option>Master's</option>
+        <option>PhD</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="bride-col bride-field">
+      <label for="college">College / University</label>
+      <input id="college" name="college" class="bride-input" type="text">
+    </div>
+  </div>
+
+  <div class="bride-row" style="margin-top:8px;">
+    <div class="bride-col bride-field">
+      <label for="working_status">Working status *</label>
+      <select id="working_status" name="working_status" class="bride-input" required>
+        <option value="">Select</option>
+        <option value="working">Working</option>
+        <option value="not_working">Not working</option>
+        <option value="student">Student</option>
+      </select>
+      <div class="field-error" data-for="working_status">Please select working status</div>
+    </div>
+  </div>
+
+  <div class="bride-actions">
+    <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+    <button type="button" class="bride-btn primary" onclick="nextStep()">Next →</button>
+  </div>
+</section>
+
+        <!-- Slide 11 — Profession -->
+        <section class="bride-step" data-step="11" id="step-11">
+          <h2 class="bride-step-title">Profession</h2>
+
+          <div class="bride-row">
+            <div class="bride-col bride-field">
+              <label for="profession">Profession</label>
+              <input id="profession" name="profession" class="bride-input" type="text" placeholder="eg. Software Engineer">
+            </div>
+
+            <div class="bride-col bride-field">
+              <label for="company_name">Company / Employer</label>
+              <input id="company_name" name="company_name" class="bride-input" type="text">
+            </div>
+
+            <div class="bride-col bride-field">
+              <label for="annual_income">Annual income (range)</label>
+              <select id="annual_income" name="annual_income" class="bride-input">
+                <option value="">Select</option>
+                <option>Less than 1 LPA</option>
+                <option>1 - 3 LPA</option>
+                <option>3 - 6 LPA</option>
+                <option>6 - 10 LPA</option>
+                <option>10+ LPA</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+            <button type="button" class="bride-btn primary" onclick="nextStep()">Next →</button>
+          </div>
+        </section>
+
+        <!-- Slide 12 — Lifestyle -->
+        <section class="bride-step" data-step="12" id="step-12">
+          <h2 class="bride-step-title">Lifestyle Preferences</h2>
+
+          <div class="bride-row">
+            <div class="bride-col bride-field">
+              <label for="diet">Dietary preference</label>
+              <select id="diet" name="diet" class="bride-input">
+                <option value="">Select</option>
+                <option>Vegetarian</option>
+                <option>Non-Vegetarian</option>
+                <option>Eggetarian</option>
+                <option>Vegan</option>
+              </select>
+            </div>
+
+            <div class="bride-col bride-field">
+              <label for="drinking">Drinking habits</label>
+              <select id="drinking" name="drinking" class="bride-input">
+                <option value="">Select</option>
+                <option>Never</option>
+                <option>Occasionally</option>
+                <option>Socially</option>
+              </select>
+            </div>
+
+            <div class="bride-col bride-field">
+              <label for="smoking">Smoking habits</label>
+              <select id="smoking" name="smoking" class="bride-input">
+                <option value="">Select</option>
+                <option>Never</option>
+                <option>Occasionally</option>
+                <option>Socially</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+            <button type="button" class="bride-btn primary" onclick="nextStep()">Next →</button>
+          </div>
+        </section>
+
+        <!-- Slide 13 — Interests & Personality -->
+        <section class="bride-step" data-step="13" id="step-13">
+          <h2 class="bride-step-title">Interests & Personality</h2>
+
+          <div class="bride-field">
+            <label for="hobbies">Hobbies & interests</label>
+            <input id="hobbies" name="hobbies" class="bride-input" type="text" placeholder="e.g., Reading, Cooking">
+          </div>
+
+          <div class="bride-field">
+            <label for="about_me">About me</label>
+            <textarea id="about_me" name="about_me" class="bride-input" rows="5" maxlength="800" placeholder="Short bio (max 800 chars)"></textarea>
+          </div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+            <button type="button" class="bride-btn primary" onclick="nextStep()">Next →</button>
+          </div>
+        </section>
+
+        <!-- Slide 14 — Password & Submit -->
+        <section class="bride-step" data-step="14" id="step-14">
+          <h2 class="bride-step-title">Create password & submit</h2>
+
+          <div class="bride-row">
+            <div class="bride-col bride-field">
+              <label for="password">Password *</label>
+              <input id="password" name="password" class="bride-input" type="password" required placeholder="At least 8 chars, 1 uppercase, 1 number">
+              <div class="field-error" data-for="password">Password must be at least 8 chars, 1 uppercase, 1 number</div>
+            </div>
+
+            <div class="bride-col bride-field">
+              <label for="confirm_password">Confirm password *</label>
+              <input id="confirm_password" name="confirm_password" class="bride-input" type="password" required>
+              <div class="field-error" data-for="confirm_password">Passwords must match</div>
+            </div>
+          </div>
+
+          <div id="err-pass" class="bride-error">Passwords must match and meet criteria.</div>
+
+          <div class="bride-actions">
+            <button type="button" class="bride-btn ghost" onclick="prevStep()">← Back</button>
+            <button type="submit" class="bride-btn submit" onclick="return submitBrideForm(event)">Submit</button>
+          </div>
+        </section>
+
+      </div>
+    </form>
+  </div>
+  <!-- ============================
+       JavaScript — integrated
+       ============================ -->
+ <script>
+document.addEventListener("DOMContentLoaded", () => {
+  
+  {% if show_step %}
+    window.pendingShowStep = "{{ show_step }}";
+  {% endif %}
+
+  if (window.pendingShowStep) {
+    setTimeout(() => {
+      showStepById(`step-${window.pendingShowStep}`);
+    }, 300);
+  }
+
+
+  /* -----------------------
+     DOM shortcuts & state
+     ----------------------- */
+  const steps = Array.from(document.querySelectorAll('.bride-step'));
+  let currentIndex = 0;
+  let allowFinalSubmit = false;
+
+  // DOB selects + hidden final date field
+  const day = document.getElementById("dob_day");
+  const month = document.getElementById("dob_month");
+  const year = document.getElementById("dob_year");
+  const realDob = document.getElementById("dob_real");
+
+  // contact/OTP
+  window.contactVerified = false;
+  let otpTimer = null, otpRemaining = 0;
+
+  // file/selfie elements
+  const frontFileEl = document.getElementById("frontFile");
+  const backFileEl = document.getElementById("backFile");
+  const uploadPreview = document.getElementById("uploadPreview");
+  const photoFileEl = document.getElementById("photoFile");
+  const selfieVideo = document.getElementById("selfieVideo");
+  const selfieCanvas = document.getElementById("selfieCanvas");
+  const startSelfieBtn = document.getElementById("startSelfieBtn");
+  const captureSelfieBtn = document.getElementById("captureSelfieBtn");
+
+  // face-movement UI
+  const videoEl = document.getElementById('faceVideo'); // <== important
+  const actionsDoneEl = document.getElementById('actionsDone');
+  const blinkEl = document.getElementById('blinkStatus');
+  const leftEl = document.getElementById('leftStatus');
+  const rightEl = document.getElementById('rightStatus');
+  const errMoveEl = document.getElementById('err-move');
+  const faceNextBtn = document.getElementById('faceNextBtn');
+
+  // state/city
+  const stateSelect = document.getElementById('stateSelect');
+  const citySelect = document.getElementById('citySelect');
+
+  // working/profession
+  const workingStatusSelect = document.getElementById('working_status');
+  const professionInputs = [
+    document.getElementById('profession'),
+    document.getElementById('company_name'),
+    document.getElementById('annual_income')
+  ];
+
+  /* -----------------------
+     Populate DOB selects (18+)
+     ----------------------- */
+  for (let d = 1; d <= 31; d++) day.innerHTML += `<option value="${String(d).padStart(2,'0')}">${d}</option>`;
+  for (let m = 1; m <= 12; m++) month.innerHTML += `<option value="${String(m).padStart(2,'0')}">${m}</option>`;
+  const today = new Date();
+  const maxYear = today.getFullYear() - 18;
+  const minYear = 1960;
+  for (let y = maxYear; y >= minYear; y--) year.innerHTML += `<option value="${y}">${y}</option>`;
+
+  function updateRealDate() {
+    if (day.value && month.value && year.value) {
+      realDob.value = `${year.value}-${month.value}-${day.value}`;
+      hideFieldError('dob_real');
+    }
+  }
+  day.onchange = month.onchange = year.onchange = updateRealDate;
+
+  window.openNativeDatePicker = function () {
+    if (realDob && realDob.showPicker) realDob.showPicker();
+    else if (realDob) realDob.click();
+  };
+
+  /* -----------------------
+     Step navigation helpers
+     ----------------------- */
+  function showStep(idx) {
+    steps.forEach((s, i) => {
+      s.classList.remove('active', 'left-out', 'right-out', 'bride-shake');
+      if (i === idx) s.classList.add('active');
+      else if (i < idx) s.classList.add('left-out');
+      else s.classList.add('right-out');
+    });
+    currentIndex = idx;
+    const first = steps[idx].querySelector('input, select, textarea, button');
+    if (first) first.focus();
+  }
+  function idxForId(id) { return steps.findIndex(s => s.id === id); }
+
+  window.nextStep = function () {
+    const slide = steps[currentIndex];
+    if (!validateSlide(currentIndex)) {
+      slide.classList.add('bride-shake');
+      setTimeout(() => slide.classList.remove('bride-shake'), 620);
+      return;
+    }
+
+    // skip/branch logic: after education (step-10)
+    if (steps[currentIndex].id === 'step-10') {
+      const ws = (workingStatusSelect && workingStatusSelect.value) || '';
+      if (ws === 'working') { const idx = idxForId('step-11'); if (idx !== -1) { showStep(idx); return; } }
+      else { const idx = idxForId('step-12'); if (idx !== -1) { showStep(idx); return; } }
+    }
+
+    showStep(Math.min(currentIndex + 1, steps.length - 1));
+  };
+
+  window.prevStep = function () {
+    // if currently on profession page but working_status isn't working, go back to education
+    if (steps[currentIndex].id === 'step-11') {
+      const ws = (workingStatusSelect && workingStatusSelect.value) || '';
+      if (ws !== 'working') { const idx = idxForId('step-10'); if (idx !== -1) { showStep(idx); return; } }
+    }
+    showStep(Math.max(0, currentIndex - 1));
+  };
+
+  window.showStepById = function (id) { const i = idxForId(id); if (i !== -1) showStep(i); };
+
+  // initial
+  showStep(0);
+
+  /* -----------------------
+     Inline error helpers
+     ----------------------- */
+  function showFieldError(fieldOrId, message) {
+    const sel = typeof fieldOrId === 'string' ? fieldOrId : (fieldOrId.id || null);
+    if (!sel) return;
+    const wrapper = document.querySelector(`[data-for="${sel}"]`);
+    if (wrapper) { wrapper.textContent = message || 'Invalid'; wrapper.classList.add('visible'); return; }
+    const el = document.getElementById(sel);
+    if (!el) return;
+    let err = el.parentNode.querySelector('.field-error');
+    if (!err) { err = document.createElement('div'); err.className = 'field-error visible'; err.dataset.for = sel; el.parentNode.appendChild(err); }
+    err.textContent = message || 'Invalid'; err.classList.add('visible');
+  }
+  function hideFieldError(fieldOrId) {
+    const sel = typeof fieldOrId === 'string' ? fieldOrId : (fieldOrId.id || null);
+    if (!sel) return;
+    const el = document.querySelector(`[data-for="${sel}"]`);
+    if (el) el.classList.remove('visible');
+  }
+  function clearAllFieldErrorsInSlide(slide) {
+    slide.querySelectorAll('.field-error').forEach(e => e.classList.remove('visible'));
+    slide.querySelectorAll('.bride-error').forEach(e => e.classList.remove('visible'));
+  }
+
+  /* -----------------------
+     Global slide validation (no optional fields)
+     - every visible input/select/textarea inside the slide must be non-empty
+     - exceptions: hidden inputs; conditional controls handled separately
+     ----------------------- */
+  function validateSlide(idx) {
+    const slide = steps[idx];
+    if (!slide) return false;
+    if (allowFinalSubmit) return true;
+    clearAllFieldErrorsInSlide(slide);
+
+    const controls = Array.from(slide.querySelectorAll('input, select, textarea'));
+    for (const ctrl of controls) {
+      if (ctrl.type === 'hidden') continue; // eg. csrf, hidden dob_real handled below
+      // For file inputs value = number of files
+      const tag = ctrl.tagName.toLowerCase();
+      const type = ctrl.type || '';
+      let val;
+      if (type === 'file') val = ctrl.files && ctrl.files.length;
+      else val = ctrl.value && ctrl.value.toString().trim().length ? ctrl.value.toString().trim() : null;
+
+      // dob_real must be present (we store real DOB in this hidden date)
+      if ((ctrl.id === 'dob_real' || ctrl.name === 'dob') && realDob && !realDob.value) {
+        showFieldError('dob_real', 'Select date of birth (18+)');
+        return false;
+      }
+
+      if (!val) {
+        const idOrName = ctrl.id || ctrl.name;
+        showFieldError(idOrName, 'This field is required');
+        return false;
+      }
+
+      // Specific checks inline
+      if (ctrl.id === 'dob_real' && realDob && realDob.value) {
+        const dob = new Date(realDob.value);
+        const age = (new Date()).getFullYear() - dob.getFullYear();
+        if (age < 18) { showFieldError('dob_real', 'You must be 18+'); return false; }
+      }
+    }
+
+    const slideId = slide.id;
+
+    // Step 1: ensure availability explicitly set
+    if (slideId === 'step-1') {
+      const avail = document.getElementById('availability').value;
+      if (!avail) { showFieldError('availability', 'Choose availability'); return false; }
+    }
+
+    // Step 3 religion -> require sub_community field specifically
+    if (slideId === 'step-3') {
+      const religionV = document.getElementById('religion').value;
+      const subcom = document.getElementById('sub_community').value && document.getElementById('sub_community').value.trim();
+      if (!religionV) { showFieldError('religion', 'Select religion'); return false; }
+      if (!subcom) { showFieldError('sub_community', 'Enter sub-community / caste'); return false; }
+    }
+
+    // Step 4: state & city
+    if (slideId === 'step-4') {
+      const st = document.getElementById('stateSelect').value;
+      const ct = document.getElementById('citySelect').value;
+      if (!st) { showFieldError('stateSelect', 'Select state'); return false; }
+      if (!ct) { showFieldError('citySelect', 'Select city'); return false; }
+    }
+
+    // Step 5: require both mobile and email AND OTP verified
+    if (slideId === 'step-5') {
+      const mob = document.getElementById('mobile').value && document.getElementById('mobile').value.trim();
+      const email = document.getElementById('email').value && document.getElementById('email').value.trim();
+      if (!mob) showFieldError('mobile','Mobile is required');
+      if (!email) showFieldError('email','Email is required');
+      if (!mob || !email) return false;
+      if (!window.contactVerified) { showFieldError('mobile','Please verify contact (send OTP)'); return false; }
+    }
+
+    // Step 7: front file required
+    if (slideId === 'step-7') {
+      if (!frontFileEl || !frontFileEl.files || frontFileEl.files.length === 0) { showFieldError('frontFile','Upload front ID image'); return false; }
+    }
+
+    // Step 8b: photo route requires a photo (only used if branch goes to 8b)
+    if (slideId === 'step-8b') {
+      if (!photoFileEl || !photoFileEl.files || photoFileEl.files.length === 0) { showFieldError('photoFile','Upload a photo for verification'); return false; }
+    }
+
+    // Step 9: face movement must be completed (tracked by window._actionCount)
+    if (slideId === 'step-9') {
+      if (!window.faceVerified && (typeof window._actionCount === 'undefined' || window._actionCount < 3)) { showFieldError('err-move','Complete face movement verification'); return false; }
+    }
+
+    // Step 10: working_status handled above; ensure presence
+    if (slideId === 'step-10') {
+      const ws = workingStatusSelect && workingStatusSelect.value;
+      if (!ws) { showFieldError('working_status','Select working status'); return false; }
+    }
+
+    // Step 11: if working, profession inputs required
+    if (slideId === 'step-11') {
+      if (workingStatusSelect && workingStatusSelect.value === 'working') {
+        for (const el of professionInputs) {
+          if (!el || !el.value || !el.value.trim()) { showFieldError(el.id || el.name, 'This field is required'); return false; }
+        }
+      }
+    }
+
+    // final: pass
+    return true;
+  }
+
+  /* -----------------------
+     State -> City mapping
+     ----------------------- */
+  const citiesByState = {
+    andhra_pradesh: ["Visakhapatnam","Vijayawada","Guntur","Tirupati","Nellore","Kurnool","Kakinada","Anantapur"],
+    arunachal_pradesh: ["Itanagar","Tawang","Pasighat","Ziro"],
+    assam: ["Guwahati","Tezpur","Jorhat","Dibrugarh","Silchar","Nagaon"],
+    bihar: ["Patna","Gaya","Muzaffarpur","Bhagalpur","Purnea","Darbhanga"],
+    chhattisgarh: ["Raipur","Bilaspur","Durg","Korba","Bhilai"],
+    goa: ["Panaji","Margao","Vasco da Gama","Ponda"],
+    gujarat: ["Ahmedabad","Surat","Vadodara","Rajkot","Bhavnagar","Jamnagar"],
+    haryana: ["Gurugram","Faridabad","Panipat","Karnal","Ambala"],
+    himachal_pradesh: ["Shimla","Dharamshala","Solan","Kullu","Mandi"],
+    jharkhand: ["Ranchi","Jamshedpur","Dhanbad","Bokaro","Hazaribagh"],
+    karnataka: ["Bengaluru","Mysuru","Mangalore","Hubli","Belgaum"],
+    kerala: ["Thiruvananthapuram","Kochi","Kozhikode","Thrissur","Kollam"],
+    madhya_pradesh: ["Bhopal","Indore","Gwalior","Jabalpur","Ujjain","Sagar"],
+    maharashtra: ["Mumbai","Pune","Nagpur","Nashik","Aurangabad","Thane"],
+    manipur: ["Imphal","Thoubal","Bishnupur"],
+    meghalaya: ["Shillong","Tura","Nongpoh"],
+    mizoram: ["Aizawl","Lunglei","Champhai"],
+    nagaland: ["Kohima","Dimapur","Mon"],
+    odisha: ["Bhubaneswar","Cuttack","Rourkela","Berhampur","Sambalpur"],
+    punjab: ["Ludhiana","Amritsar","Jalandhar","Patiala","Bathinda"],
+    rajasthan: ["Jaipur","Jodhpur","Udaipur","Kota","Bikaner","Ajmer"],
+    sikkim: ["Gangtok","Namchi","Gyalshing"],
+    tamil_nadu: ["Chennai","Coimbatore","Madurai","Tiruchirappalli","Salem","Tirunelveli"],
+    telangana: ["Hyderabad","Warangal","Nizamabad","Karimnagar","Khammam"],
+    tripura: ["Agartala","Udaipur","Dharmanagar"],
+    uttar_pradesh: ["Lucknow","Kanpur","Varanasi","Agra","Meerut","Noida","Ghaziabad"],
+    uttarakhand: ["Dehradun","Haridwar","Haldwani","Rishikesh","Nainital"],
+    west_bengal: ["Kolkata","Howrah","Durgapur","Siliguri","Asansol"]
+  };
+
+  if (stateSelect && citySelect) {
+    stateSelect.addEventListener('change', function () {
+      citySelect.innerHTML = '<option value="">Select city</option>';
+      (citiesByState[this.value] || []).forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        citySelect.appendChild(opt);
+      });
+      hideFieldError('stateSelect');
+      hideFieldError('citySelect');
+    });
+  }
+
+  /* -----------------------
+     OTP helpers (dev)
+     ----------------------- */
+  window.startOtpTimer = function (sec) {
+    otpRemaining = sec;
+    updateOtpTimer();
+    clearInterval(otpTimer);
+    otpTimer = setInterval(() => {
+      otpRemaining--;
+      updateOtpTimer();
+      if (otpRemaining <= 0) {
+        clearInterval(otpTimer);
+        const st = document.getElementById("otpStatus");
+        if (st) st.textContent = "OTP expired. Click resend.";
+      }
+    }, 1000);
+  };
+  function updateOtpTimer() {
+    const mm = String(Math.floor(otpRemaining / 60)).padStart(2,"0");
+    const ss = String(otpRemaining % 60).padStart(2,"0");
+    const el = document.getElementById("otpTimer");
+    if (el) el.textContent = `${mm}:${ss}`;
+  }
+
+  window.sendOTP = function () {
+    const mobile = document.getElementById("mobile").value && document.getElementById("mobile").value.trim();
+    const email = document.getElementById("email").value && document.getElementById("email").value.trim();
+    if (!mobile || !email) {
+      if (!mobile) showFieldError('mobile','Mobile required to send OTP');
+      if (!email) showFieldError('email','Email required to send OTP');
+      return;
+    }
+    document.getElementById("otpBox").style.display = "block";
+    document.getElementById("otpStatus").textContent = "OTP sent (dev: 111111)";
+    window.startOtpTimer(30);
+  };
+
+  window.verifyOTP = function () {
+    const code = document.getElementById("otpInput").value.trim();
+    if (code === "111111") {
+      window.contactVerified = true;
+      document.getElementById("otpStatus").innerHTML = "<div style='color:var(--success)'>Verified ✓</div>";
+      clearInterval(otpTimer);
+      hideFieldError('mobile'); hideFieldError('email');
+    } else {
+      window.contactVerified = false;
+      document.getElementById("otpStatus").innerHTML = "<div style='color:var(--error)'>Incorrect OTP.</div>";
+    }
+  };
+  window.resendOTP = function() { window.sendOTP(); };
+
+  window.nextStepIfVerified = function () {
+    if (!window.contactVerified) {
+      showFieldError('mobile','Please verify contact (send OTP)');
+      return alert("Please verify OTP first.");
+    }
+    nextStep();
+  };
+
+  /* -----------------------
+     File previews
+     ----------------------- */
+  function previewFile(file, which) {
+    if (!file) return;
+    if (which === "front" && !file.type.startsWith("image/")) { alert("Front ID must be an image"); frontFileEl.value = ""; return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const prev = uploadPreview.querySelector(`[data-side="${which}"]`);
+      if (prev) prev.remove();
+      const img = document.createElement("img");
+      img.src = ev.target.result;
+      img.className = "preview-img";
+      img.dataset.side = which;
+      uploadPreview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  }
+  frontFileEl && frontFileEl.addEventListener("change", e => { hideFieldError('frontFile'); previewFile(e.target.files[0],"front"); });
+  backFileEl && backFileEl.addEventListener("change", e => previewFile(e.target.files[0],"back"));
+
+  photoFileEl && photoFileEl.addEventListener("change", e => {
+    hideFieldError('photoFile');
+    const file = e.target.files[0];
+    const preview = document.getElementById("photoPreview");
+    preview.innerHTML = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return alert("Upload an image");
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.className = "preview-img";
+    preview.appendChild(img);
+  });
+
+  /* -----------------------
+     Selfie camera
+     ----------------------- */
+  let selfieStream = null;
+  window.startSelfieCamera = async function () {
+    try {
+      selfieStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      selfieVideo.srcObject = selfieStream;
+      selfieVideo.style.display = 'block';
+      const ph = document.getElementById("selfiePlaceholder"); if (ph) ph.style.display = 'none';
+      captureSelfieBtn.style.display = 'block';
+      startSelfieBtn.style.display = 'none';
+    } catch (err) { alert('Camera access denied.'); }
+  };
+  window.captureSelfie = function () {
+    if (!selfieStream) return alert('Start camera first');
+    const ctx = selfieCanvas.getContext('2d');
+    selfieCanvas.width = selfieVideo.videoWidth;
+    selfieCanvas.height = selfieVideo.videoHeight;
+    ctx.drawImage(selfieVideo,0,0);
+    const dataUrl = selfieCanvas.toDataURL('image/jpeg');
+    document.getElementById('selfie_data').value = dataUrl;
+    const preview = document.getElementById("selfiePreview"); preview.innerHTML = "";
+    const img = document.createElement("img"); img.src = dataUrl; img.className = "preview-img"; preview.appendChild(img);
+  };
+
+  /* -----------------------
+     Face verify POST
+     ----------------------- */
+  async function postFaceVerify(formData) {
+    try {
+      const response = await fetch("/api/verify-face/", { method: "POST", body: formData });
+      return await response.json();
+    } catch (err) {
+      console.error("Face verify error:", err);
+      return { match: false, score: 0, message: "Network error" };
+    }
+  }
+
+  function handleFaceVerifyResult(result, mode) {
+    const display = mode === "selfie" ? document.getElementById("selfieCompareStatus") : document.getElementById("compareStatus");
+    if (display) display.style.display = "block";
+    if (!result || result.match === undefined) {
+      if (display) { display.style.color = "var(--error)"; display.textContent = "Face verification failed — invalid response."; }
+      return;
+    }
+    const score = result.score || 0;
+    if (!result.match) { if (display) { display.style.color = "var(--error)"; display.textContent = `Match failed (${score}%). Minimum required: 75%.`; } return; }
+    window.faceVerified = true;
+    if (display) { display.style.color = "var(--success)"; display.textContent = `Match successful: ${score}%`; }
+    document.getElementById("match_score").value = result.score;
+    document.getElementById("face_verified").value = "1";
+    setTimeout(()=> showStepById("step-9"), 700);
+  }
+
+  window.compareSelfieWithId = async function () {
+    const frontFile = frontFileEl && frontFileEl.files && frontFileEl.files[0];
+    const selfieData = document.getElementById("selfie_data").value;
+    const display = document.getElementById("selfieCompareStatus");
+    if (display) { display.style.display = "block"; display.style.color = "var(--light-grey)"; display.textContent = "Processing..."; }
+    if (!frontFile || !selfieData) { if (display) { display.style.color = "var(--error)"; display.textContent = "Upload ID and take a selfie first."; } return; }
+    const fd = new FormData(); fd.append("id_proof_front", frontFile); fd.append("selfie", dataURLtoBlob(selfieData), "selfie.jpg");
+    const result = await postFaceVerify(fd); handleFaceVerifyResult(result,"selfie");
+  };
+
+  window.compareUploadedPhotoWithId = async function () {
+    const frontFile = frontFileEl && frontFileEl.files && frontFileEl.files[0];
+    const photo = photoFileEl && photoFileEl.files && photoFileEl.files[0];
+    const display = document.getElementById("compareStatus");
+    if (display) { display.style.display = "block"; display.style.color = "var(--light-grey)"; display.textContent = "Processing..."; }
+    if (!frontFile || !photo) { if (display) { display.style.color = "var(--error)"; display.textContent = "Upload ID and a photo first."; } return; }
+    const fd = new FormData(); fd.append("id_proof_front", frontFile); fd.append("uploaded_photo", photo);
+    const result = await postFaceVerify(fd); handleFaceVerifyResult(result,"photo");
+  };
+
+  function dataURLtoBlob(dataURL) {
+    const parts = dataURL.split(','); const mime = parts[0].match(/:(.*?);/)[1];
+    const bstr = atob(parts[1]); let n = bstr.length; const u8 = new Uint8Array(n);
+    while (n--) u8[n] = bstr.charCodeAt(n);
+    return new Blob([u8], { type: mime });
+  }
+
+  /* -----------------------
+     MediaPipe face movement
+     ----------------------- */
+  (function () {
+    try {
+      const CALIB_FRAMES = 30, SMOOTH_ALPHA = 0.15, TURN_THRESHOLD = 0.10, TURN_HOLD_FRAMES = 6;
+      const BLINK_RATIO_THRESHOLD = 0.20, BLINK_HOLD = 2;
+      const LEFT_CHEEK = 234, RIGHT_CHEEK = 454, NOSE_TIP = 1, LEFT_EYE_TOP = 159, LEFT_EYE_BOTTOM = 145, RIGHT_EYE_TOP = 386, RIGHT_EYE_BOTTOM = 374;
+
+      let cameraObj = null, faceMesh = null;
+      let calibrationFrames = 0, neutralCenter = null, smoothedOffset = 0;
+      let leftHold = 0, rightHold = 0, blinkHold = 0;
+      let detected = { blink:false, left:false, right:false };
+      window._actionCount = 0;
+
+      function updateUI() {
+        if (actionsDoneEl) actionsDoneEl.textContent = String(window._actionCount);
+        if (blinkEl) blinkEl.innerHTML = `Blink: ${detected.blink ? '✓' : '❌'}`;
+        if (leftEl) leftEl.innerHTML = `Turn left: ${detected.left ? '✓' : '❌'}`;
+        if (rightEl) rightEl.innerHTML = `Turn right: ${detected.right ? '✓' : '❌'}`;
+        if (faceNextBtn) faceNextBtn.disabled = window._actionCount < 3;
+        if (errMoveEl) { if (window._actionCount < 3) errMoveEl.classList.add('visible'); else errMoveEl.classList.remove('visible'); }
+      }
+
+      function eyeOpening(landmarks, topIdx, bottomIdx) {
+        const top = landmarks[topIdx], bottom = landmarks[bottomIdx]; return Math.abs(top.y - bottom.y);
+      }
+
+      function onResults(results) {
+        if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) return;
+        const lm = results.multiFaceLandmarks[0];
+        const leftCheek = lm[LEFT_CHEEK], rightCheek = lm[RIGHT_CHEEK];
+        const faceWidth = Math.abs(rightCheek.x - leftCheek.x) || 1e-6;
+        const noseX = lm[NOSE_TIP].x;
+
+        if (calibrationFrames < CALIB_FRAMES) {
+          if (!neutralCenter) neutralCenter = { x:0, n:0 };
+          neutralCenter.x = (neutralCenter.x * neutralCenter.n + noseX) / (neutralCenter.n + 1);
+          neutralCenter.n += 1; calibrationFrames++; smoothedOffset = 0; return;
+        }
+        if (!neutralCenter) neutralCenter = { x: noseX, n: CALIB_FRAMES };
+        const centerX = neutralCenter.x; const offset = (noseX - centerX) / faceWidth;
+        smoothedOffset = SMOOTH_ALPHA * offset + (1 - SMOOTH_ALPHA) * smoothedOffset;
+
+        if (!detected.left && smoothedOffset > TURN_THRESHOLD) leftHold++; else leftHold = 0;
+        if (!detected.right && smoothedOffset < -TURN_THRESHOLD) rightHold++; else rightHold = 0;
+        if (!detected.left && leftHold >= TURN_HOLD_FRAMES) { detected.left = true; window._actionCount++; }
+        if (!detected.right && rightHold >= TURN_HOLD_FRAMES) { detected.right = true; window._actionCount++; }
+
+        const leftEye = eyeOpening(lm, LEFT_EYE_TOP, LEFT_EYE_BOTTOM);
+        const rightEye = eyeOpening(lm, RIGHT_EYE_TOP, RIGHT_EYE_BOTTOM);
+        const avgEye = (leftEye + rightEye) / 2;
+        const blinkMetric = avgEye / faceWidth;
+        if (!detected.blink && blinkMetric < BLINK_RATIO_THRESHOLD) blinkHold++; else blinkHold = 0;
+        if (!detected.blink && blinkHold >= BLINK_HOLD) { detected.blink = true; window._actionCount++; }
+
+        updateUI();
+      }
+
+      window.resetDetection = function () {
+        calibrationFrames = 0; neutralCenter = null; smoothedOffset = 0;
+        leftHold = rightHold = blinkHold = 0; detected = { blink:false, left:false, right:false };
+        window._actionCount = 0; updateUI();
+      };
+
+      window.startFaceDetection = async function () {
+        try {
+          window.resetDetection();
+          const startBtn = document.getElementById("startFaceBtn"), stopBtn = document.getElementById("stopFaceBtn"), retryBtn = document.getElementById("retryFaceBtn");
+          if (startBtn) startBtn.style.display = 'none';
+          if (stopBtn) stopBtn.style.display = 'inline-block';
+          if (retryBtn) retryBtn.style.display = 'none';
+          if (videoEl) videoEl.style.display = 'block';
+
+          faceMesh = new FaceMesh({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}` });
+          faceMesh.setOptions({ maxNumFaces:1, refineLandmarks:true, minDetectionConfidence:0.5, minTrackingConfidence:0.5 });
+          faceMesh.onResults(onResults);
+
+          cameraObj = new Camera(videoEl, { onFrame: async () => { await faceMesh.send({ image: videoEl }); }, width:640, height:480 });
+          cameraObj.start();
+
+          const prevText = errMoveEl ? errMoveEl.textContent : '';
+          if (errMoveEl) { errMoveEl.classList.add('visible'); errMoveEl.textContent = 'Calibrating... please look straight at camera'; }
+          setTimeout(()=> { if (calibrationFrames >= CALIB_FRAMES && errMoveEl) { errMoveEl.classList.remove('visible'); errMoveEl.textContent = prevText; } }, (CALIB_FRAMES * 40));
+        } catch(err) {
+          console.error('startFaceDetection error',err);
+          alert('Camera failed to start. Allow camera permission and retry.');
+          const startBtn = document.getElementById("startFaceBtn"), stopBtn = document.getElementById("stopFaceBtn");
+          if (startBtn) startBtn.style.display = 'inline-block'; if (stopBtn) stopBtn.style.display = 'none';
+        }
+      };
+
+      window.stopFaceDetection = function () {
+        try { if (cameraObj && cameraObj.stop) cameraObj.stop(); if (videoEl && videoEl.srcObject) { videoEl.srcObject.getTracks().forEach(t => t.stop()); videoEl.srcObject = null; } } catch(e){}
+        const startBtn = document.getElementById("startFaceBtn"), stopBtn = document.getElementById("stopFaceBtn"), retryBtn = document.getElementById("retryFaceBtn");
+        if (startBtn) startBtn.style.display = 'inline-block'; if (stopBtn) stopBtn.style.display = 'none'; if (retryBtn) retryBtn.style.display = 'inline-block';
+      };
+
+      window.retryFaceDetection = function () {
+        try { if (cameraObj && cameraObj.stop) cameraObj.stop(); if (videoEl && videoEl.srcObject) { videoEl.srcObject.getTracks().forEach(t => t.stop()); videoEl.srcObject = null; } } catch(e){}
+        calibrationFrames = 0; neutralCenter = null; smoothedOffset = 0; leftHold = rightHold = blinkHold = 0; detected = { blink:false, left:false, right:false }; window._actionCount = 0;
+        if (blinkEl) blinkEl.innerHTML = "Blink: ❌"; if (leftEl) leftEl.innerHTML = "Turn left: ❌"; if (rightEl) rightEl.innerHTML = "Turn right: ❌";
+        if (actionsDoneEl) actionsDoneEl.textContent = "0"; if (faceNextBtn) faceNextBtn.disabled = true; if (errMoveEl) errMoveEl.classList.remove("visible");
+        const startBtn = document.getElementById("startFaceBtn"), stopBtn = document.getElementById("stopFaceBtn");
+        if (startBtn) startBtn.style.display = "inline-block"; if (stopBtn) stopBtn.style.display = "none";
+        setTimeout(()=> { window.startFaceDetection(); }, 300);
+      };
+
+      window.verifyMovements = function () {
+        if (window._actionCount < 3) {
+          if (errMoveEl) { errMoveEl.classList.add('visible'); errMoveEl.textContent = 'Please complete all actions for verification.'; }
+          const s = document.getElementById('step-9'); s && s.classList.add('bride-shake'); setTimeout(()=> s && s.classList.remove('bride-shake'),620); return;
+        }
+        window.stopFaceDetection();
+        window.faceVerified = true;
+        showStepById('step-10');
+      };
+
+      if (errMoveEl) errMoveEl.classList.remove('visible');
+      const stopBtnInit = document.getElementById("stopFaceBtn"); if (stopBtnInit) stopBtnInit.style.display = 'none';
+    } catch(e) {
+      console.warn('MediaPipe block failed to initialize', e);
+    }
+  })();
+
+  /* -----------------------
+     Working status listener (profession required only when working)
+     ----------------------- */
+  if (workingStatusSelect) {
+    workingStatusSelect.addEventListener('change', function () {
+      const val = this.value;
+      if (val === 'working') {
+        professionInputs.forEach(i => { if (i) { i.required = true; hideFieldError(i.id); }});
+      } else {
+        professionInputs.forEach(i => { if (i) { i.required = false; i.value = ''; hideFieldError(i.id); }});
+      }
+    });
+  }
+
+  /* -----------------------
+     Branch after ID upload
+     ----------------------- */
+  window.afterIdUpload = function () {
+    const idType = document.getElementById("idType").value;
+    if (!idType) { showFieldError('idType','Select ID type'); return; }
+    if (!frontFileEl || !frontFileEl.files || frontFileEl.files.length === 0) { showFieldError('frontFile','Upload front ID image'); return; }
+    const avail = document.getElementById("availability").value;
+    if (avail === "yes") showStepById("step-8a"); else showStepById("step-8b");
+  };
+
+  /* -----------------------
+     Final submit handler (password checks)
+     ----------------------- */
+  window.submitBrideForm = function (evt) {
+    allowFinalSubmit = false;
+    if (!validateSlide(idxForId('step-14'))) {
+      const slide = document.getElementById('step-14'); slide && slide.classList.add('bride-shake'); setTimeout(()=> slide && slide.classList.remove('bride-shake'), 620);
+      return false;
+    }
+
+    const pw = document.getElementById("password").value.trim();
+    const cpw = document.getElementById("confirm_password").value.trim();
+    hideFieldError('password'); hideFieldError('confirm_password');
+    const errPass = document.getElementById('err-pass'); errPass && errPass.classList.remove('visible');
+
+    if (!pw) { showFieldError('password','Password required'); errPass && errPass.classList.add('visible'); return false; }
+    if (pw.length < 8 || !/[A-Z]/.test(pw) || !/\d/.test(pw)) { showFieldError('password','At least 8 chars, 1 uppercase, 1 number'); errPass && errPass.classList.add('visible'); return false; }
+    if (pw !== cpw) { showFieldError('confirm_password','Passwords do not match'); errPass && errPass.classList.add('visible'); return false; }
+
+    allowFinalSubmit = true;
+    return true;
+  };
+
+  window.goToProfileSelection = function () { window.location.href = "{% url 'register' %}"; };
+
+  // expose helpers globally (optional)
+  window.showFieldError = showFieldError; window.hideFieldError = hideFieldError;
+
+}); // DOMContentLoaded
+</script>
+</body>
+</html>

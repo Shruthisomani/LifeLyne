@@ -1,0 +1,202 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Dashboard — LifeLyne</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="{% static 'main.css' %}">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+</head>
+<body>
+
+<!-- NAV / TABS -->
+<header class="navbar" role="banner">
+  <div class="nav-left"><span class="brand">Life<span class="lyne">LYNE</span></span></div>
+  <nav class="top-tabs" aria-label="Primary">
+    <a class="tab active" href="{% url 'home' %}">Dashboard</a>
+    <a class="tab" href="{% url 'matches' %}">Matches</a>
+    <a class="tab" href="#">Messages</a>
+    <a class="tab" href="#">Preferences</a>
+    <a class="tab" href="#">Activity</a>
+  </nav>
+
+  <div class="nav-actions">
+    <button class="icon-circle" aria-label="notifications">🔔 <span class="notif-badge">3</span></button>
+    <a href="{% url 'profile_full' profile.id %}" title="Open your profile">
+      {% if profile.avatar_image %}
+    <img src="{{ profile.avatar_image.url }}" alt="Your avatar" class="top-avatar">
+{% else %}
+    <div class="initial-avatar small-avatar">
+  {{ profile.first_name|default:"?"|slice:":1"|upper }}
+</div>
+
+{% endif %}
+
+    </a>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<main class="wrap" role="main">
+  <!-- LEFT sidebar (preferences moved here & compact today widget) -->
+  <aside class="left-col" aria-label="Sidebar">
+    <div class="card small-card">
+      <div class="small-head">Your preferences</div>
+      <div class="prefs">
+        <div><strong>Age</strong>: 25–30</div>
+        <div><strong>Preferred Height</strong>: 5'5" +</div>
+        <div><strong>Location</strong>: Hyderabad, Bangalore</div>
+        <div><strong>Education</strong>: B.Tech, MBA</div>
+      </div>
+      <a class="small-link" href="#">Edit preferences</a>
+    </div>
+  
+
+
+    <div class="card small-card">
+      <div class="small-head">Today at a glance</div>
+      <div class="glance" role="list">
+        <div class="g-item" role="listitem">👤 <div class="g-num">{{ stats.new_matches|default:8 }}</div><div class="g-label">New</div></div>
+        <div class="g-item" role="listitem">💖 <div class="g-num">{{ stats.shortlisted|default:5 }}</div><div class="g-label">Shortlisted</div></div>
+        <div class="g-item" role="listitem">👀 <div class="g-num">{{ stats.views|default:21 }}</div><div class="g-label">Profile Views</div></div>
+      </div>
+    </div>
+
+    <div class="card small-card">
+      <div class="small-head">Recently viewed</div>
+      <ul class="recent list-reset">
+        <li>Arjun — Doctor • Hyderabad</li>
+        <li>Rahul — Engineer • Bangalore</li>
+      </ul>
+    </div>
+
+  </aside>
+
+  <!-- MAIN column -->
+  <section class="main-col" aria-label="Main content">
+    <!-- compact user header -->
+    <div class="card user-header" role="region" aria-label="Your profile">
+      <div class="uh-left">
+            {% if profile.avatar_image %}
+              <img src="{{ profile.avatar_image.url }}" alt="avatar" class="uh-avatar">
+            {% else %}
+              <div class="initial-avatar">
+                {{ profile.first_name|default:"?"|slice:":1"|upper }}
+              </div>
+            {% endif %}
+
+        <div>
+          <div class="uh-name">{{ profile.name|default:"Shruti (Demo)" }}</div>
+          <div class="muted small">Member since demo • Hyderabad</div>
+        </div>
+      </div>
+      <div class="uh-right">
+
+        <a class="btn-outline" href="{% url 'edit_profile' %}">Edit profile</a>
+
+
+        <div class="muted small">Completion</div>
+        <div class="progress-mini" style="--p: {{ profile.completion|default:80 }}%;">
+          <div class="progress-mini-bar" style="width:{{ profile.completion|default:80 }}%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- search + filters row -->
+   <div class="card filters-row" role="region" aria-label="Search and filters">
+  <div class="search-pill" role="search">
+    <svg class="search-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.6" fill="none"/>
+    </svg>
+    <input id="searchInput" class="input-search" type="search" placeholder="Search by name, city, profession..." />
+  </div>
+
+  <div class="filter-controls" role="group" aria-label="Inline filters">
+    <select id="filterHeight" class="select-dark"><option value="">Height</option><option value=">=5.5">5'5"</option></select>
+    <select id="filterCity" class="select-dark"><option value="">City</option><option>Hyderabad</option><option>Bangalore</option></select>
+    <select id="filterJob" class="select-dark"><option value="">Job</option><option>Engineer</option><option>Doctor</option></select>
+    <button id="applyFilters" class="btn-sm">Apply</button>
+  </div>
+  
+</div>
+</div>
+
+  <!-- hint explaining Search vs Preferences -->
+ 
+
+
+      
+    </div>
+
+    <!-- matches grid header -->
+    <div class="card stats-row compact" role="region" aria-label="Activity summary">
+      <div class="stat-mini">New matches <div class="stat-num">{{ stats.new_matches|default:8 }}</div></div>
+      <div class="stat-mini">Shortlisted <div class="stat-num">{{ stats.shortlisted|default:5 }}</div></div>
+      <div class="stat-mini">Profile Views <div class="stat-num">{{ stats.views|default:21 }}</div></div>
+      <div style="margin-left:auto"><a href="{% url 'matches' %}" class="btn-primary">View all matches</a></div>
+    </div>
+
+    <!-- recommended matches -->
+    <h2 class="section-title">Recommended matches</h2>
+    <p class="muted tiny-note">
+    ℹ️ Matches shown are based on your preferences.  
+     Use Search to explore more profiles.
+    </p>
+
+    <p class="muted">Based on your preferences — filter inline to refine results.</p>
+
+    <div id="matchesGrid" class="match-grid" role="list">
+      {% for m in matches %}
+      
+<article class="match-card" 
+         data-id="{{ m.id }}"
+         data-profession="{{ m.profession|default:''|lower }}"
+         data-location="{{ m.location|default:''|lower }}"
+         data-age="{{ m.age|default:'' }}"
+         data-preferred="{{ m.preferred|default:''|lower }}"
+         aria-label="{{ m.name }}" role="listitem">
+
+  <div class="match-top" style="position:relative;">
+    <div class="match-avatar-wrap">
+      <img src="{% static m.img|default:'img/img2.jpg' %}" alt="{{ m.name }}" class="match-avatar">
+    </div>
+
+    <div class="match-info">
+      <div class="match-name">{{ m.name }}, <span class="muted small">{{ m.age }}</span></div>
+      <div class="muted small">{{ m.profession }} • {{ m.location }}</div>
+
+      <div class="match-icons" aria-hidden="true">
+        <span title="Job">💼 {{ m.profession|truncatechars:18 }}</span>
+        <span title="Height">📏 5'7"</span>
+        <span title="Smoking">🚭 Non-smoker</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="match-body">
+    <!-- NEW: match percent badge moved here -->
+    <div class="match-score-inline">{{ m.match }}% match</div>
+
+    <div class="match-meta short">Preferred: {{ m.preferred|default:"N/A" }}</div>
+
+    <div class="match-actions">
+      <a href="{% url 'profile_full' m.id %}" class="btn-ghost">View</a>
+      <button class="btn-like" onclick="shortlist({{ m.id }}, this)">❤️ Shortlist</button>
+      <button class="btn-ghost" onclick="sendInterest({{ m.id }})">💬 Send Interest</button>
+    </div>
+  </div>
+</article>
+
+
+      {% empty %}
+      <p>No matches yet — try widening preferences.</p>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+
+<script src="{% static 'dashboard.js' %}"></script>
+</body>
+</html>

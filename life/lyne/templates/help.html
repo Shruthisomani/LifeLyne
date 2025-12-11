@@ -1,0 +1,275 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Help & Support – LifeLyne</title>
+    <link rel="stylesheet" href="{% static 'main.css' %}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <header class="navbar">
+    <div class="nav-left">
+        <span class="life">Life</span><span class="lyne">LYNE</span>
+    </div>
+
+    <nav class="nav-links">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'services' %}">Services</a>
+        <a href="{% url 'help' %}" class="active">Help</a>
+    </nav>
+
+    <div class="nav-actions">
+        <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-primary">Register Free</a>
+    </div>
+</header>
+
+
+    <main class="page help-page">
+        <!-- HERO -->
+        <section class="help-hero">
+            <div>
+                <p class="help-pill">Support center</p>
+                <h1 class="help-title">How can we help you, today?</h1>
+                <p class="help-sub">
+                    Reach our support team for account issues, payments, safety concerns or
+                    feedback. LifeLyne is built to keep brides, grooms and families safe –
+                    and we’re here if you ever need us.
+                </p>
+            </div>
+        </section>
+
+        <!-- TABS -->
+        <section class="help-tabs">
+            <button class="help-tab-button active" data-tab="contact">Contact us</button>
+            <button class="help-tab-button" data-tab="business">Business enquiries</button>
+            <button class="help-tab-button" data-tab="feedback">Feedback</button>
+            <button class="help-tab-button" data-tab="stores">Retail offices</button>
+        </section>
+
+        <!-- PANELS -->
+        <section class="help-panels">
+            <!-- CONTACT -->
+            <div class="help-panel active" id="tab-contact">
+                <div class="help-card">
+                    <h2>Talk to LifeLyne support</h2>
+                    <p class="help-text">
+                        Our team is available 7 days a week for account access, payment help and
+                        safety queries.
+                    </p>
+
+                    <div class="help-columns">
+                        <div>
+                            <h3>Helpline numbers</h3>
+                            <ul class="help-list">
+                                <li><strong>India:</strong> +91-98XX-XXX-000</li>
+                                <li><strong>UAE:</strong> +971-5X-XXX-0000</li>
+                                <li><strong>Other countries:</strong> support@lifelyne.in</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3>Support channels</h3>
+                            <ul class="help-list">
+                                <li>Email: support@lifelyne.in</li>
+                                <li>Chat: Live chat inside the LifeLyne app</li>
+                                <li>Hours: 9:00 AM – 9:00 PM IST (all 7 days)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary help-cta">Chat with support</button>
+                </div>
+            </div>
+
+            <!-- BUSINESS -->
+            <div class="help-panel" id="tab-business">
+                <div class="help-card">
+                    <h2>Business & partnership enquiries</h2>
+                    <p class="help-text">
+                        For partnerships, events, wedding services or corporate tie-ups with
+                        LifeLyne, share your details and our team will get in touch.
+                    </p>
+
+                    <form class="help-form">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Your name</label>
+                                <input type="text" placeholder="Full name">
+                            </div>
+                            <div class="form-field">
+                                <label>Organisation / company</label>
+                                <input type="text" placeholder="Company name">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Nature of business</label>
+                                <input type="text" placeholder="Wedding services, brand, media...">
+                            </div>
+                            <div class="form-field">
+                                <label>Contact phone</label>
+                                <input type="text" placeholder="+91-XXXXXXXXXX">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>E-mail</label>
+                                <input type="email" placeholder="you@example.com">
+                            </div>
+                            <div class="form-field">
+                                <label>Queries / partnership details</label>
+                                <textarea rows="3" placeholder="Tell us how you’d like to partner with LifeLyne."></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary help-submit">Submit enquiry</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- FEEDBACK -->
+            <div class="help-panel" id="tab-feedback">
+                <div class="help-card">
+                    <h2>Feedback & suggestions</h2>
+                    <p class="help-text">
+                        Tell us what’s working well and where we can improve. Your feedback helps
+                        us build a safer and more meaningful matrimony experience.
+                    </p>
+
+                    <form class="help-form">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Your name</label>
+                                <input type="text" placeholder="Optional">
+                            </div>
+                            <div class="form-field">
+                                <label>E-mail</label>
+                                <input type="email" placeholder="For follow-up (optional)">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Category</label>
+                                <select>
+                                    <option>-- Select --</option>
+                                    <option>App / website</option>
+                                    <option>Profiles & matching</option>
+                                    <option>Payment & plans</option>
+                                    <option>Safety / report user</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label>Priority</label>
+                                <select>
+                                    <option>Normal</option>
+                                    <option>High</option>
+                                    <option>Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field full-width">
+                                <label>Suggestions / feedback</label>
+                                <textarea rows="3" placeholder="Share your thoughts..."></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary help-submit">Send feedback</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- STORES -->
+            <div class="help-panel" id="tab-stores">
+                <div class="help-card">
+                    <h2>Retail offices & support locations</h2>
+                    <p class="help-text">
+                        Meet our team in person for payments, account help or assisted registration.
+                        More cities will be added as we expand.
+                    </p>
+
+                    <div class="help-store-filters">
+                        <select>
+                            <option>Select state</option>
+                            <option>Andhra Pradesh</option>
+                            <option>Telangana</option>
+                            <option>Tamil Nadu</option>
+                            <option>Karnataka</option>
+                            <option>Maharashtra</option>
+                        </select>
+                        <select>
+                            <option>Select city</option>
+                            <option>Hyderabad</option>
+                            <option>Vijayawada</option>
+                            <option>Visakhapatnam</option>
+                            <option>Chennai</option>
+                            <option>Bengaluru</option>
+                        </select>
+                        <button class="btn btn-secondary">Search</button>
+                    </div>
+
+                    <div class="help-store-list">
+                        <div class="store-item">
+                            <h3>Hyderabad – Corporate office</h3>
+                            <p>Road no. X, Banjara Hills, Hyderabad – 500034</p>
+                            <p class="store-meta">Walk-in hours: 10:00 AM – 7:00 PM</p>
+                        </div>
+
+                        <div class="store-item">
+                            <h3>Vijayawada – Support center</h3>
+                            <p>MG Road, Near landmark, Vijayawada – 520010</p>
+                            <p class="store-meta">Walk-in hours: 10:00 AM – 6:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'main.js' %}"></script>
+    <script src="{% static 'main.js' %}"></script>
+
+    <!-- Inline script ONLY for Help tabs -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tabButtons = document.querySelectorAll(".help-tab-button");
+            const panels = document.querySelectorAll(".help-panel");
+
+            if (tabButtons.length === 0 || panels.length === 0) {
+                return;
+            }
+
+            tabButtons.forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    const tabName = btn.getAttribute("data-tab");
+                    if (!tabName) return;
+
+                    // 1) active button style
+                    tabButtons.forEach(function (b) {
+                        b.classList.remove("active");
+                    });
+                    btn.classList.add("active");
+
+                    // 2) show matching panel
+                    panels.forEach(function (panel) {
+                        if (panel.id === "tab-" + tabName) {
+                            panel.classList.add("active");
+                        } else {
+                            panel.classList.remove("active");
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+</body>
+</html>

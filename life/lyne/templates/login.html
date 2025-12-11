@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login – LifeLyne</title>
+    <link rel="stylesheet" href="{% static 'main.css' %}">
+    <!-- TEST OVERRIDE: paste below this -->
+<style>
+/* TEMP TEST — will override anything in main.css while present */
+.auth-card { max-width:520px !important; margin:40px auto !important; padding:20px !important; }
+.auth-card .form-control { width:80% !important; max-width:480px !important; margin:10px auto !important; display:block !important; box-sizing:border-box !important; padding:12px 14px !important; }
+.auth-card .auth-submit { width:220px !important; margin:16px auto !important; display:block !important; }
+.auth-title .heart { filter: drop-shadow(0 6px 14px rgba(201,168,106,0.25)); }
+
+</style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="nav-left">
+            <span class="life">Life</span><span class="lyne">LYNE</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+            <a href="{% url 'services' %}" class="{% if request.resolver_match.url_name == 'services' %}active{% endif %}">Services</a>
+            <a href="{% url 'help' %}" class="{% if request.resolver_match.url_name == 'help' %}active{% endif %}">Help</a>
+        </nav>
+
+       
+    </header>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="flash flash-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+
+    <!-- LOGIN SECTION -->
+   <main class="page auth-page">
+
+    <div class="auth-card">
+
+        <h1 class="auth-title">Welcome Back <span class="heart">❤️</span></h1>
+
+        <p class="auth-text">Log in to continue your journey with LifeLyne.</p>
+        
+        <form class="help-form" method="POST">
+            {% csrf_token %}
+
+            <div class="form-row">
+                <div class="form-field full-width">
+                    <label for="email_or_mobile">Email or Mobile</label>
+                    <input id="email_or_mobile" name="email_or_mobile" type="text" class="form-control" placeholder="Enter email or mobile" required />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-field full-width">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" class="form-control" placeholder="Enter password" required />
+                </div>
+            </div>
+
+            <div class="auth-row">
+                <a href="{% url 'password_reset' %}" class="auth-link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="auth-submit">Login</button>
+
+            <p class="auth-bottom">
+                New to LifeLyne?
+                <a href="{% url 'register' %}" class="auth-link">Create account</a>
+            </p>
+        </form>
+
+    </div>
+
+</main>
+
+
+</body>
+</html>
