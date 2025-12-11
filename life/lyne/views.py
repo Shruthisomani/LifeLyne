@@ -536,3 +536,4 @@ def edit_profile(request, user_id):
     # GET -> show form
     return render(request, "edit_profile.html", {"profile": profile})
 
+# Checking for git
